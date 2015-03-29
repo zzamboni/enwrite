@@ -20,12 +20,6 @@ class Hugo < Output
     puts "Found note '#{note.title}'"
     puts "Created: #{Time.at(note.created/1000)}"
     puts "Content length: #{note.contentLength}"
-    note.tagNames = []
-    if metadata.tagGuids != nil
-      tags = Evernote_utils.tags
-      note.tagNames = metadata.tagGuids.map { |guid| tags[guid].name }
-    end
-    puts "Tags: #{note.tagNames}"
 
     frontmatter = {}
     frontmatter['title'] = note.title

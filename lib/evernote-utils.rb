@@ -110,8 +110,15 @@ class Evernote_utils
     self.tags
   end
 
-  def self.getWholeNote(guid)
-    return self.noteStore.getNote(self.authToken, guid, true, true, false, false)
+  def self.getWholeNote(metadata)
+    note = self.noteStore.getNote(self.authToken, metadata.guid, true, true, false, false)
+    note.tagNames = []
+    if metadata.tagGuids != nil
+      tags = Evernote_utils.tags
+      note.tagNames = metadata.tagGuids.map { |guid| tags[guid].name }
+    end
+    puts "Tags: #{note.tagNames}"
+    return note
   end
   
 end

@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 00:50:24 diego>
+# Time-stamp: <2015-03-29 12:06:42 diego>
 
 require "digest/md5"
 require 'evernote-thrift'
@@ -14,11 +14,10 @@ require "optparse"
 require "ostruct"
 
 options = OpenStruct.new
-options.outdir = "./output"
-options.tag = 'published'
+options.removetags = []
 
 opts = OptionParser.new do |opts|
-  opts.banner = "Usage: #{$0} [-n notebook | -e searchexp ] -o outdir"
+  opts.banner = "Usage: #{$0} [options] (at least one of -n or -s has to be specified)"
 
   def opts.show_usage
     puts self
@@ -26,28 +25,39 @@ opts = OptionParser.new do |opts|
   end
 
   opts.separator ''
-  opts.on("-n NOTEBOOK", "--notebook",
+  opts.on("-n", "--notebook NOTEBOOK",
           "Process notes from specified notebook.") do |notebook|
     options.notebook = notebook
   end
-  opts.on("-t TAG", "--tag",
-          "Process notes that have the specified tag.") do |tag|
+  opts.on("-t", "--tag TAG",
+          "Process only notes that have this tag",
+          " within the given notebook.") do |tag|
     options.tag = tag
   end
-  opts.on("-s SEARCHEXP", "--search",
-          "Process notes that match specified search expression.") do |searchexp|
+  opts.on("-s", "--search SEARCHEXP",
+          "Process notes that match given search",
+          " expression. If specified, --notebook",
+          " and --tag are ignored.") do |searchexp|
     options.searchexp = searchexp
     options.tag = nil
     options.notebook = nil
   end
-  opts.on("-o OUTDIR", "--output-dir",
-          "Base dir of hugo output installation.") do |outdir|
+  opts.on("-o", "--output-dir OUTDIR",
+          "Base dir of hugo output installation") do |outdir|
     options.outdir = outdir
   end
-  opts.on("-h", "--help", "Shows this help message") { opts.show_usage }
+  opts.on("--remove-tags [t1,t2,t3]", Array,
+          "List of tags to remove from output posts.",
+          "If no argument given, defaults to --tag.") do |removetags|
+    puts "removetags = #{removetags}"
+    options.removetags = removetags || [options.tag]
+  end
+  opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
 end
 
 opts.parse!
+
+puts options
 
 if not (options.notebook or options.searchexp)
   $stderr.puts "You have to specify at least one of --notebook or --search"
@@ -90,6 +100,7 @@ hugo = Hugo.new(options.outdir)
   
 results.notes.each do |metadata|
   puts "######################################################################"
-  note = Evernote_utils.getWholeNote(metadata.guid)
+  note = Evernote_utils.getWholeNote(metadata)
+  note.tagNames = note.tagNames - options.removetags
   hugo.output_note(metadata, note)
 end

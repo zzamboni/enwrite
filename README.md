@@ -8,7 +8,7 @@ Evernote-powered statically-generated blogs and websites.
 
 Very early work-in-progress, more to come soon.
 
-For now it produces output suitable for [http://gohugo.io](Hugo). You
+For now it produces output suitable for [Hugo](http://gohugo.io). You
 need to have an existing Hugo install. Sample usage (for now you need
 to get an Evernote authentication token at
 https://sandbox.evernote.com/api/DeveloperToken.action:

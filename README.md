@@ -1,8 +1,8 @@
 # enwrite
 
-> What wild heart-histories seemed to lie enwritten
+> What wild heart-histories seemed to lie enwritten<br/>
 > Upon those crystalline, celestial spheres!
-<p align="right">---Edgar Allan Poe</p>
+<p align="right">&mdash;Edgar Allan Poe</p>
 
 Evernote-powered statically-generated blogs and websites.
 

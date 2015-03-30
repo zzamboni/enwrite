@@ -2,12 +2,15 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 19:26:37 diego>
+# Time-stamp: <2015-03-29 20:45:38 diego>
 
 require 'output'
+require 'output/filters'
 require 'yaml'
 require 'enml-utils'
 require 'fileutils'
+
+include Filters
 
 class Hugo < Output
   def initialize(base_dir, opts = {})
@@ -15,6 +18,7 @@ class Hugo < Output
     @content_dir = opts[:content_dir] || "#{@base_dir}/content"
     @blog_dir = opts[:blog_dir] || "#{@content_dir}/post"
     @page_dir = opts[:page_dir] || @content_dir
+    @use_filters = opts[:use_filters] || true
 
     # These are [ realpath, urlpath ]
     @static_dir = opts[:static_dir] || [ "#{@base_dir}/static", "/" ]
@@ -52,11 +56,11 @@ class Hugo < Output
       f.puts
       enml = ENML_utils.new(note.content, note.resources,
                             @img_dir, @audio_dir, @video_dir, @files_dir)
-      if markdown
-        f.puts(enml.to_text)
-      else
-        f.puts(enml.to_html)
+      output = markdown ? enml.to_text : enml.to_html
+      if @use_filters
+        output = run_filters(output)
       end
+      f.puts(output)
       enml.resource_files.each do |resfile|
         FileUtils.mkdir_p File.dirname(resfile[:fname])
         File.open(resfile[:fname], "w") do |r|

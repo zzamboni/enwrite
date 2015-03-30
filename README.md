@@ -16,12 +16,17 @@ https://sandbox.evernote.com/api/DeveloperToken.action:
     $ export EN_AUTH_TOKEN=xxxxxxxxx
     $ export RUBYLIB=./lib
     $ ./enwrite.rb -h
-    Usage: ./enwrite.rb [-n notebook | -e searchexp ] -o outdir
+    Usage: ./enwrite.rb [options] (at least one of -n or -s has to be specified)
     
         -n, --notebook NOTEBOOK          Process notes from specified notebook.
-        -t, --tag TAG                    Process notes that have the specified tag.
-        -s, --search SEARCHEXP           Process notes that match specified search expression.
-        -o, --output-dir OUTDIR          Base dir of hugo output installation.
+        -t, --tag TAG                    Process only notes that have this tag
+                                          within the given notebook.
+        -s, --search SEARCHEXP           Process notes that match given search
+                                          expression. If specified, --notebook
+                                          and --tag are ignored.
+        -o, --output-dir OUTDIR          Base dir of hugo output installation
+            --remove-tags [t1,t2,t3]     List of tags to remove from output posts.
+                                         If no argument given, defaults to --tag.
         -h, --help                       Shows this help message
     
     $ ./enwrite.rb -n my_notebook -o /my/hugo/blog/

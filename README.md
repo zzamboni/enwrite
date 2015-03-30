@@ -1,4 +1,4 @@
-# enwrite
+# Enwrite
 
 > What wild heart-histories seemed to lie enwritten<br/>
 > Upon those crystalline, celestial spheres!
@@ -8,13 +8,13 @@ Evernote-powered statically-generated blogs and websites.
 
 Very early work-in-progress, more to come soon.
 
-For now it produces output suitable for [Hugo](http://gohugo.io). You
-need to have an existing Hugo install. Sample usage (for now you need
-to get an Evernote authentication token at
-https://sandbox.evernote.com/api/DeveloperToken.action:
+The first time you run it (or if you use the `--auth` flag afterward)
+you will be asked to open an Evernote authentication page, and then to
+provided the authentication code to Enwrite.
 
-    $ export EN_AUTH_TOKEN=xxxxxxxxx
-    $ export RUBYLIB=./lib
+For now it produces output suitable for [Hugo](http://gohugo.io). You
+need to have an existing Hugo install. Sample usage:
+
     $ ./enwrite.rb -h
     Usage: ./enwrite.rb [options] (at least one of -n or -s has to be specified)
     
@@ -27,8 +27,10 @@ https://sandbox.evernote.com/api/DeveloperToken.action:
         -o, --output-dir OUTDIR          Base dir of hugo output installation
             --remove-tags [t1,t2,t3]     List of tags to remove from output posts.
                                          If no argument given, defaults to --tag.
+            --auth [TOKEN]               Force Evernote reauthentication (will happen automatically if needed).
+                                         If TOKEN is given, use it, otherwise get one interactively.
         -h, --help                       Shows this help message
-    
+        
     $ ./enwrite.rb -n my_notebook -o /my/hugo/blog/
     
     $ ./enwrite.rb -s 'some search expression' -o /my/hugo/blog

@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 16:45:26 diego>
+# Time-stamp: <2015-03-30 15:59:10 diego>
 
 require "digest/md5"
 require 'evernote-thrift'
@@ -52,6 +52,12 @@ opts = OptionParser.new do |opts|
     puts "removetags = #{removetags}"
     options.removetags = removetags || [options.tag]
   end
+  opts.on("--auth [TOKEN]",
+          "Force Evernote reauthentication (will happen automatically if needed).",
+          "If TOKEN is given, use it, otherwise get one interactively.") do |forceauth|
+    options.forceauth = true
+    options.authtoken = forceauth
+  end
   opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
 end
 
@@ -73,7 +79,7 @@ puts "Output dir: #{options.outdir}"
 puts "Search expression: #{searchexp}"
 
 # Initialize Evernote access
-Evernote_utils.init
+Evernote_utils.init(options.forceauth, options.authtoken)
 
 puts
 puts "Reading all notes from #{searchexp}"

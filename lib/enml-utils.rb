@@ -2,9 +2,10 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 13:56:13 diego>
+# Time-stamp: <2015-03-29 18:19:09 diego>
 
 require 'digest'
+require 'htmlentities'
 require 'rexml/parsers/sax2parser'
 require 'rexml/sax2listener'
 require 'rexml/document'
@@ -14,7 +15,8 @@ include REXML
 class ENML_Listener
   include REXML::SAX2Listener
 
-  def initialize(resources, img_dir, audio_dir, video_dir, files_dir)
+  def initialize(resources, to_text, img_dir, audio_dir, video_dir, files_dir)
+    @to_text = to_text
     @files = []
     @resources = resources || []
     @img_dir = img_dir
@@ -36,14 +38,24 @@ class ENML_Listener
   
   def start_element(uri, localname, qname, attributes)
     # $stderr.puts "Found start: #{uri}, #{localname}, #{qname}, #{attributes}"
+    new_elem = nil
     if localname == 'en-note'
       # Convert <en-note> to <span>
-      new_elem = Element.new('div')
+      new_elem = Element.new('span')
       new_elem.add_attributes(attributes)
     elsif localname == 'en-todo'
-      new_elem = Element.new('input')
-      if attributes and attributes['checked'] == 'true'
-        new_elem.add_attribute('checked', 'checked')
+      unless @to_text
+        new_elem = Element.new('input')
+        new_elem.add_attribute('type', 'checkbox')
+        if attributes and attributes['checked'] == 'true'
+          new_elem.add_attribute('checked', 'checked')
+        end
+      else
+        if attributes and attributes['checked'] == 'true'
+          @stack[-1].add_text("[x] ")
+        else
+          @stack[-1].add_text("[ ] ")
+        end
       end
     elsif localname == 'en-media'
       if attributes['type'] =~ /^image\/(.+)/
@@ -60,10 +72,7 @@ class ENML_Listener
             new_file[:basename] = "#{attributes['hash']}.#{subtype}"
           end
           new_file[:fname] = "#{@img_dir[0]}/#{new_file[:basename]}"
-          puts "@img_dir = #{@img_dir}"
-          puts "Filename = #{new_file[:fname]}"
           new_file[:url] = "#{@img_dir[1]}/#{new_file[:basename]}"
-          puts "Url = #{new_file[:url]}"
           new_file[:data] = resource.data.body
           new_elem.add_attributes(attributes)
           new_elem.add_attribute('src', new_file[:url])
@@ -77,9 +86,6 @@ class ENML_Listener
       else
         puts "Don't know how to handle other files yet"
       end
-      # For now we just copy it, TBD later
-#      new_elem = Element.new(localname)
-#      new_elem.add_attributes(attributes)
     else
       new_elem = Element.new(localname)
       new_elem.add_attributes(attributes)
@@ -90,7 +96,7 @@ class ENML_Listener
   def end_element(uri, localname, qname)
     # $stderr.puts "Found   end: #{uri}, #{localname}, #{qname}"
     new_elem = @stack.pop
-    @stack[-1].add_element(new_elem)
+    @stack[-1].add_element(new_elem) unless new_elem.nil?
   end
   
   def characters(text)
@@ -101,7 +107,20 @@ class ENML_Listener
   def end_document
     # $stderr.puts "End of document! Here's what I collected:"
     @output = ""
-    @stack[-1].write(@output, 0)
+    @stack[-1].write(@output)
+    decoder = HTMLEntities.new
+    # One pass of entity decoding for HTML output...
+    @output = decoder.decode(@output)
+    if @to_text
+      @output.gsub!(/<\/?span[^>]*>/, '')
+      @output.gsub!(/\t*<div[^>]*>/, '')
+      @output.gsub!(/<\/div>/, "\n")
+      @output.gsub!(/^\s+$/, '')
+      @output.gsub!(/\n+/, "\n")
+      @output.gsub!(/<br[^>]*\/>/, "\n")
+      # ...two passes of decoding for text output.
+      @output = decoder.decode(@output)
+    end
   end
 
   def output
@@ -113,7 +132,7 @@ class ENML_Listener
 end
 
 class ENML_utils
-  def initialize(text = "", resources = nil, img_dir, audio_dir, video_dir, files_dir)
+  def initialize(text, resources = nil, img_dir, audio_dir, video_dir, files_dir)
     @text = text or ""
     @resources = resources or []
     @img_dir = img_dir
@@ -122,19 +141,27 @@ class ENML_utils
     @files_dir = files_dir
   end
 
-  def to_html
+  def to_html(to_text=false)
     parser = Parsers::SAX2Parser.new( @text )
-    listener = ENML_Listener.new(@resources, @img_dir, @audio_dir, @video_dir, @files_dir)
+    puts "to_html input text:"
+    puts "-----"
+    puts @text
+    puts "-----"
+    listener = ENML_Listener.new(@resources, to_text, @img_dir, @audio_dir, @video_dir, @files_dir)
     parser.listen(listener)
     parser.parse
     @files = listener.files
+    puts "to_html output:"
+    puts listener.output
+    puts "-----"
     return listener.output
   end
 
+  def to_text
+    return to_html(true)
+  end
+  
   def resource_files
     return @files
   end
 end
-
-#enml = ENML_utils.new(File.new( ARGV[0] ).read)
-#puts enml.to_html

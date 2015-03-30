@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 12:06:42 diego>
+# Time-stamp: <2015-03-29 16:45:26 diego>
 
 require "digest/md5"
 require 'evernote-thrift'

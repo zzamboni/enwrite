@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 14:01:39 diego>
+# Time-stamp: <2015-03-29 19:26:37 diego>
 
 require 'output'
 require 'yaml'
@@ -29,14 +29,20 @@ class Hugo < Output
     puts "Created: #{Time.at(note.created/1000)}"
     puts "Content length: #{note.contentLength}"
 
+    markdown = note.tagNames.include?('markdown')
+    if markdown
+      puts "Markdown tag found: I will interpret the file as markdown"
+      note.tagNames -= [ 'markdown' ]
+    end
+
     frontmatter = {}
-    frontmatter['title'] = note.title
+    frontmatter['title'] = note.title.gsub('#', " No. ")
     frontmatter['date'] = Time.at(note.created/1000).strftime('%F')
     frontmatter['tags'] = note.tagNames
     frontmatter['categories'] = note.tagNames
     frontmatter['description'] = ""
 
-    base = [frontmatter['date'], note.title.gsub(/\W+/, "-")].join('-') + ".md"
+    base = [frontmatter['date'], note.title.gsub(/\W+/, "-")].join('-') + (markdown ? ".md" : ".html")
     fname = "#{@blog_dir}/#{base}"
 
     FileUtils.mkdir_p @blog_dir
@@ -46,7 +52,11 @@ class Hugo < Output
       f.puts
       enml = ENML_utils.new(note.content, note.resources,
                             @img_dir, @audio_dir, @video_dir, @files_dir)
-      f.puts(enml.to_html)
+      if markdown
+        f.puts(enml.to_text)
+      else
+        f.puts(enml.to_html)
+      end
       enml.resource_files.each do |resfile|
         FileUtils.mkdir_p File.dirname(resfile[:fname])
         File.open(resfile[:fname], "w") do |r|

@@ -29,6 +29,7 @@ need to have an existing Hugo install. Sample usage:
                                          If no argument given, defaults to --tag.
             --auth [TOKEN]               Force Evernote reauthentication (will happen automatically if needed).
                                          If TOKEN is given, use it, otherwise get one interactively.
+        -v, --verbose                    Verbose mode
         -h, --help                       Shows this help message
         
     $ ./enwrite.rb -n my_notebook -o /my/hugo/blog/

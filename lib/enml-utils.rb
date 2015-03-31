@@ -2,7 +2,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 18:19:09 diego>
+# Time-stamp: <2015-03-30 17:52:54 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -10,6 +10,7 @@ require 'rexml/parsers/sax2parser'
 require 'rexml/sax2listener'
 require 'rexml/document'
 require 'rexml/element'
+require 'util'
 include REXML
 
 class ENML_Listener
@@ -27,7 +28,7 @@ class ENML_Listener
     @resources.each do |res|
       hash = Digest.hexencode(res.data.bodyHash)
       @resource_index[hash] = res
-      puts "Stored index for resource with hash #{hash}"
+      verbose "Stored index for resource with hash #{hash}"
     end
   end
     
@@ -63,7 +64,7 @@ class ENML_Listener
         new_elem = Element.new('img')
         resource = @resource_index[attributes['hash']]
         if resource.nil?
-          puts "An error occurred - I don't have a resource with hash #{attributes['hash']}"
+          error "An error occurred - I don't have a resource with hash #{attributes['hash']}"
         else
           new_file = {}
           if (!resource.attributes.nil? && !resource.attributes.fileName.nil?)
@@ -80,11 +81,11 @@ class ENML_Listener
           @files.push(new_file)
         end
       elsif attributes['type'] =~ /^audio\//
-        puts "Don't know how to handle audio files yet"
+        error "Don't know how to handle audio files yet"
       elsif attributes['type'] =~ /^video\//
-        puts "Don't know how to handle video files yet"
+        error "Don't know how to handle video files yet"
       else
-        puts "Don't know how to handle other files yet"
+        error "Don't know how to handle other files yet"
       end
     else
       new_elem = Element.new(localname)
@@ -143,17 +144,17 @@ class ENML_utils
 
   def to_html(to_text=false)
     parser = Parsers::SAX2Parser.new( @text )
-    puts "to_html input text:"
-    puts "-----"
-    puts @text
-    puts "-----"
+    verbose "to_html input text:"
+    verbose "-----"
+    verbose @text
+    verbose "-----"
     listener = ENML_Listener.new(@resources, to_text, @img_dir, @audio_dir, @video_dir, @files_dir)
     parser.listen(listener)
     parser.parse
     @files = listener.files
-    puts "to_html output:"
-    puts listener.output
-    puts "-----"
+    verbose "to_html output:"
+    verbose listener.output
+    verbose "-----"
     return listener.output
   end
 

@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 20:45:38 diego>
+# Time-stamp: <2015-03-30 17:52:54 diego>
 
 require 'output'
 require 'output/filters'
@@ -30,12 +30,12 @@ class Hugo < Output
   
   def output_note(metadata, note)
     puts "Found note '#{note.title}'"
-    puts "Created: #{Time.at(note.created/1000)}"
-    puts "Content length: #{note.contentLength}"
+    verbose "Created: #{Time.at(note.created/1000)}"
+    verbose "Content length: #{note.contentLength}"
 
     markdown = note.tagNames.include?('markdown')
     if markdown
-      puts "Markdown tag found: I will interpret the file as markdown"
+      puts "    It has the 'markdown' tag, so I will interpret it as markdown"
       note.tagNames -= [ 'markdown' ]
     end
 
@@ -66,10 +66,10 @@ class Hugo < Output
         File.open(resfile[:fname], "w") do |r|
           r.write(resfile[:data])
         end
-        puts "Wrote file #{resfile[:fname]}"
+        verbose "Wrote file #{resfile[:fname]}"
       end
     end
 
-    puts "Wrote file #{fname}"
+    verbose "Wrote file #{fname}"
   end
 end

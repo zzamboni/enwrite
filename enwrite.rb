@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-30 15:59:10 diego>
+# Time-stamp: <2015-03-30 17:47:11 diego>
 
 require "digest/md5"
 require 'evernote-thrift'
@@ -12,9 +12,11 @@ require 'output/hugo'
 require 'evernote-utils'
 require "optparse"
 require "ostruct"
+require 'util'
 
 options = OpenStruct.new
 options.removetags = []
+options.verbose = false
 
 opts = OptionParser.new do |opts|
   opts.banner = "Usage: #{$0} [options] (at least one of -n or -s has to be specified)"
@@ -49,7 +51,6 @@ opts = OptionParser.new do |opts|
   opts.on("--remove-tags [t1,t2,t3]", Array,
           "List of tags to remove from output posts.",
           "If no argument given, defaults to --tag.") do |removetags|
-    puts "removetags = #{removetags}"
     options.removetags = removetags || [options.tag]
   end
   opts.on("--auth [TOKEN]",
@@ -58,12 +59,15 @@ opts = OptionParser.new do |opts|
     options.forceauth = true
     options.authtoken = forceauth
   end
+  opts.on_tail("-v", "--verbose", "Verbose mode") { options.verbose=true }
   opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
 end
 
 opts.parse!
 
-puts options
+$enwrite_verbose = options.verbose
+
+verbose("Options: " + options.to_s)
 
 if not (options.notebook or options.searchexp)
   $stderr.puts "You have to specify at least one of --notebook or --search"
@@ -75,15 +79,13 @@ exps = [ options.searchexp ? options.searchexp : nil,
        ]
 searchexp = exps.join(' ')
         
-puts "Output dir: #{options.outdir}"
-puts "Search expression: #{searchexp}"
+verbose "Output dir: #{options.outdir}"
+verbose "Search expression: #{searchexp}"
 
 # Initialize Evernote access
 Evernote_utils.init(options.forceauth, options.authtoken)
 
-puts
 puts "Reading all notes from #{searchexp}"
-puts
 
 filter = Evernote::EDAM::NoteStore::NoteFilter.new
 filter.words = searchexp
@@ -105,7 +107,7 @@ results = Evernote_utils.noteStore.findNotesMetadata(Evernote_utils.authToken,
 hugo = Hugo.new(options.outdir)
   
 results.notes.each do |metadata|
-  puts "######################################################################"
+  verbose "######################################################################"
   note = Evernote_utils.getWholeNote(metadata)
   note.tagNames = note.tagNames - options.removetags
   hugo.output_note(metadata, note)

@@ -2,7 +2,7 @@
 # Evernote access utilities
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-30 16:07:02 diego>
+# Time-stamp: <2015-03-30 17:52:54 diego>
 
 # Load libraries required by the Evernote OAuth
 require 'oauth'
@@ -121,10 +121,9 @@ it yourself later in #{TOKENFILE} if you want to keep it around."
     versionOK = self.userStore.checkVersion("enwrite",
 				            Evernote::EDAM::UserStore::EDAM_VERSION_MAJOR,
 				            Evernote::EDAM::UserStore::EDAM_VERSION_MINOR)
-    puts "Is my Evernote API version up to date?  #{versionOK}"
-    puts
+    verbose "Is my Evernote API version up to date?  #{versionOK}"
     unless versionOK
-      puts "Please update the Evernote Ruby libraries."
+      error "Please update the Evernote Ruby libraries - they are not up to date."
       exit(1)
     end
   end
@@ -148,10 +147,10 @@ it yourself later in #{TOKENFILE} if you want to keep it around."
     if (@@notebooks == nil) or force
       # List all of the notebooks in the user's account
       @@notebooks = self.noteStore.listNotebooks(self.authToken)
-      puts "Found #{notebooks.size} notebooks:"
+      verbose "Found #{notebooks.size} notebooks:"
       defaultNotebook = notebooks.first
       notebooks.each do |notebook|
-        puts "  * #{notebook.name}"
+        verbose "  * #{notebook.name}"
       end
     end
     return @@notebooks
@@ -159,7 +158,7 @@ it yourself later in #{TOKENFILE} if you want to keep it around."
 
   def self.tags(force=false)
     if (@@tags == nil) or force
-      puts "Reading all tags:"
+      verbose "Reading all tags:"
       
       # Get list of all tags, cache it for future use
       taglist = self.noteStore.listTags(self.authToken)
@@ -168,9 +167,9 @@ it yourself later in #{TOKENFILE} if you want to keep it around."
       for t in taglist
         @@tags[t.guid] = t
         @@tags[t.name] = t
-        print "#{t.name} "
+        print "#{t.name} " if $enwrite_verbose
       end
-      puts
+      verbose("")
     end
     return @@tags
   end
@@ -197,7 +196,7 @@ it yourself later in #{TOKENFILE} if you want to keep it around."
       tags = Evernote_utils.tags
       note.tagNames = metadata.tagGuids.map { |guid| tags[guid].name }
     end
-    puts "Tags: #{note.tagNames}"
+    verbose "Tags: #{note.tagNames}"
     return note
   end
   

@@ -6,28 +6,30 @@ module Filters
     newtext = text
     text.scan(/(\[(\w+)([^\]]*)\])/) do |m|
       match = m[0]
-      puts "match = #{match}"
+      verbose "match = #{match}"
       filter = m[1]
       args = m[2]
       if Filters.method_defined?("filter_#{filter}")
         fn=Filters.method("filter_#{filter}")
         arg = {}
         args = HTMLEntities.new.decode(args)
-        puts "args = #{args}"
+        verbose "args = #{args}"
         args.scan(/\b(\w+)="([^"]*)"/) { |a|
           arg[a[0]] = a[1]
         }
-        puts "Calling filter_#{filter} with args #{arg}"
+        verbose "Calling filter_#{filter} with args #{arg}"
         result = fn.(arg)
         if not result.nil?
           newtext = newtext.gsub(match, result)
         end
       else
-        $stderr.puts("Warning: nonexistent filter #{filter} used, leaving text as is")
+        # We only produce this message in verbose mode because it gets triggered
+        # every time [some text in brackets] is used
+        warn("Warning: nonexistent filter #{filter} used, leaving text as is") if $enwrite_verbose
       end
     end
-    puts "After running filters:"
-    puts newtext
+    verbose "After running filters:"
+    verbose newtext
     return newtext
   end
   

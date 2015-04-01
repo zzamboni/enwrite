@@ -2,7 +2,7 @@
 # Evernote access utilities
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-30 17:52:54 diego>
+# Time-stamp: <2015-03-31 21:13:52 diego>
 
 # Load libraries required by the Evernote OAuth
 require 'oauth'
@@ -18,7 +18,7 @@ class Evernote_utils
   OAUTH_CONSUMER_SECRET = "05f988c37b5e8c68"
   
   # Connect to Sandbox server?
-  SANDBOX = true
+  SANDBOX = false
 
   # File where to store and look for the auth token
   TOKENFILE = "#{ENV['HOME']}/.enwrite-auth-token"

@@ -13,8 +13,28 @@ you will be asked to open an Evernote authentication page, and then to
 provided the authentication code to Enwrite.
 
 For now it produces output suitable for [Hugo](http://gohugo.io). You
-need to have an existing Hugo install. Sample usage:
+need to have an existing Hugo install.
 
+## Getting started
+
+Clone this repository:
+
+    $ cd ~/tmp
+    $ git clone https://github.com/zzamboni/enwrite
+
+Install prerequisite gems (I'll set up a `Gemfile` sometime):
+
+    $ gem install evernote_oauth htmlentities
+
+Create a new Hugo site for testing (if you don't have one already):
+
+    $ cd ~/tmp
+    $ hugo new site my-hugo-blog
+    $ mkdir my-hugo-blog/themes; git clone https://github.com/zyro/hyde-x.git my-hugo-blog/themes/hyde-x
+
+Populate it with contents from Evernote:
+
+    $ cd ~/tmp/enwrite
     $ ./enwrite.rb -h
     Usage: ./enwrite.rb [options] (at least one of -n or -s has to be specified)
     
@@ -31,7 +51,28 @@ need to have an existing Hugo install. Sample usage:
                                          If TOKEN is given, use it, otherwise get one interactively.
         -v, --verbose                    Verbose mode
         -h, --help                       Shows this help message
-        
-    $ ./enwrite.rb -n my_notebook -o /my/hugo/blog/
-    
-    $ ./enwrite.rb -s 'some search expression' -o /my/hugo/blog
+
+Generate posts from all notes tagged `published` in notebook
+`my_notebook`:
+
+    $ ./enwrite.rb -n my_notebook -t published -o ~/tmp/my-hugo-blog
+
+Generate posts from all notes matching `some search expression`:
+
+    $ ./enwrite.rb -s 'some search expression' -o /tmp/my-hugo-blog
+
+For now it correctly embeds images in notes. Videos, audio and other
+file types coming soon.
+
+The following shortcuts are recognized:
+
+Embed Youtube video by URL or ID. You can optionally specify `width`
+and `height`. All arguments must be enclosed in double quotes.
+
+    [youtube url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+    [youtube src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+    [youtube id="dQw4w9WgXcQ" width="640px" height="480px"]
+
+Embed gist:
+
+    [gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]

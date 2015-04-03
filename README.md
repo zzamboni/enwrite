@@ -10,7 +10,7 @@ Very early work-in-progress, more to come soon.
 
 The first time you run it (or if you use the `--auth` flag afterward)
 you will be asked to open an Evernote authentication page, and then to
-provided the authentication code to Enwrite.
+provide the authentication code to Enwrite.
 
 For now it produces output suitable for [Hugo](http://gohugo.io). You
 need to have an existing Hugo install.
@@ -56,6 +56,8 @@ Generate posts from all notes tagged `published` in notebook
 `my_notebook`:
 
     $ ./enwrite.rb -n my_notebook -t published -o ~/tmp/my-hugo-blog
+    $ cd ~/tmp/my-hugo-blog
+    $ hugo server --watch
 
 Generate posts from all notes matching `some search expression`:
 

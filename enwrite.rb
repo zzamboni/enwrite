@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-30 17:47:11 diego>
+# Time-stamp: <2015-04-06 00:52:25 diego>
 
 require "digest/md5"
 require 'evernote-thrift'
@@ -110,5 +110,5 @@ results.notes.each do |metadata|
   verbose "######################################################################"
   note = Evernote_utils.getWholeNote(metadata)
   note.tagNames = note.tagNames - options.removetags
-  hugo.output_note(metadata, note)
+  hugo.output_note(note)
 end

@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-10 01:38:53 diego>
+# Time-stamp: <2015-04-10 01:59:34 diego>
 
 require 'output'
 require 'output/filters'
@@ -27,9 +27,9 @@ class Hugo < Output
     @files_dir = opts[:files_dir] || [ "#{@static_dir[0]}/files", "/files" ]
 
     # Tag-to-type map
-    @tag_to_type = { "default" => "post",
-                     "post" => "post",
-                     "page" => "page" }
+    @tag_to_type = { "default" => "post/",
+                     "post" => "post/",
+                     "page" => "" }
     @tag_to_type_order = [ "post", "page", "default" ]
 
     # Markdown tag
@@ -63,6 +63,12 @@ class Hugo < Output
       return
     end
 
+    # Determine if we should include the page in the main menu
+    inmainmenu = note.tagNames.include?('_mainmenu')
+    if inmainmenu
+      note.tagNames -= [ '_mainmenu' ]
+    end
+
     # Run hugo to create the file, then read it back it to update the front matter
     # with our tags.
     fname = nil
@@ -71,7 +77,7 @@ class Hugo < Output
       date = Time.at(note.created/1000).strftime('%F')
       # Force -f yaml because it's so much easier to process
       while true
-        output = %x(#{@hugo_cmd} new -f yaml '#{type}/#{date}-#{note.title}.#{(markdown ? "md" : "html")}')
+        output = %x(#{@hugo_cmd} new -f yaml '#{type}#{date}-#{note.title}.#{(markdown ? "md" : "html")}')
         if output =~ /^(.+) created$/
           # Load the frontmatter
           fname = $1
@@ -85,6 +91,8 @@ class Hugo < Output
           frontmatter['categories'] = note.tagNames
           # Set slug to work around https://github.com/spf13/hugo/issues/1017
           frontmatter['slug'] = note.title.downcase.gsub(/\W+/, "-").gsub(/^-+/, "").gsub(/-+$/, "")
+          # Set main menu tag if needed
+          frontmatter['menu'] = 'main' if inmainmenu
           break
         elsif output =~ /ERROR: \S+ (.+) already exists/
           # Remove and regenerate existing files

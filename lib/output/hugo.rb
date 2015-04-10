@@ -108,6 +108,7 @@ class Hugo < Output
                             @img_dir, @audio_dir, @video_dir, @files_dir)
       output = markdown ? enml.to_text : enml.to_html
       if @use_filters
+        verbose "Running filters on text"
         output = run_filters(output)
       end
       f.puts(output)

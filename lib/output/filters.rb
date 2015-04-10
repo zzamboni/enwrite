@@ -1,3 +1,4 @@
+# coding: utf-8
 require 'htmlentities'
 
 module Filters
@@ -14,7 +15,7 @@ module Filters
         arg = {}
         args = HTMLEntities.new.decode(args)
         verbose "args = #{args}"
-        args.scan(/\b(\w+)="([^"]*)"/) { |a|
+        args.scan(/\b(\w+)=["“]([^"]*)["”]/) { |a|
           arg[a[0]] = a[1]
         }
         verbose "Calling filter_#{filter} with args #{arg}"

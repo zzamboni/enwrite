@@ -1,0 +1,5 @@
+source 'https://rubygems.org'
+gem 'evernote-thrift'
+gem 'evernote_oauth'
+gem 'htmlentities'
+gem 'oauth'

@@ -22,9 +22,10 @@ Clone this repository:
     $ cd ~/tmp
     $ git clone https://github.com/zzamboni/enwrite
 
-Install prerequisite gems (I'll set up a `Gemfile` sometime):
+Install prerequisite gems using `bundler`:
 
-    $ gem install evernote_oauth htmlentities
+    $ gem install bundler
+    $ bundle install
 
 Create a new Hugo site for testing (if you don't have one already):
 

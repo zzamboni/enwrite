@@ -4,7 +4,10 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-06 00:52:25 diego>
+# Time-stamp: <2015-04-14 22:19:56 diego>
+
+require 'rubygems'
+require 'bundler/setup'
 
 require "digest/md5"
 require 'evernote-thrift'

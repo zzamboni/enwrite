@@ -1,8 +1,9 @@
+# coding: utf-8
 #
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-30 17:52:54 diego>
+# Time-stamp: <2015-04-16 14:33:17 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -38,7 +39,6 @@ class ENML_Listener
   end
   
   def start_element(uri, localname, qname, attributes)
-    # $stderr.puts "Found start: #{uri}, #{localname}, #{qname}, #{attributes}"
     new_elem = nil
     if localname == 'en-note'
       # Convert <en-note> to <span>
@@ -95,18 +95,15 @@ class ENML_Listener
   end
   
   def end_element(uri, localname, qname)
-    # $stderr.puts "Found   end: #{uri}, #{localname}, #{qname}"
     new_elem = @stack.pop
     @stack[-1].add_element(new_elem) unless new_elem.nil?
   end
   
   def characters(text)
-    # $stderr.puts "Found '#{text}'"
     @stack[-1].add_text(text)
   end
 
   def end_document
-    # $stderr.puts "End of document! Here's what I collected:"
     @output = ""
     @stack[-1].write(@output)
     decoder = HTMLEntities.new

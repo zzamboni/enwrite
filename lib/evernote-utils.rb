@@ -2,12 +2,12 @@
 # Evernote access utilities
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-15 21:49:21 diego>
+# Time-stamp: <2015-04-16 14:56:08 diego>
 
 # Load libraries required by the Evernote OAuth
 require 'oauth'
 require 'oauth/consumer'
- 
+
 # Load Thrift & Evernote Ruby libraries
 require "evernote_oauth"
 
@@ -190,5 +190,44 @@ You can also store it in the ENWRITE_AUTH_TOKEN environment variable."
     verbose "Tags: #{note.tagNames}"
     return note
   end
-  
+
+  # From http://pollen.io/2012/12/creating-a-note-in-evernote-from-ruby/
+  # With changes to handle RATE_LIMIT_REACHED
+  def self.translate_error(e)
+    error_name = "unknown"
+    case e.errorCode
+    when Evernote::EDAM::Error::EDAMErrorCode::AUTH_EXPIRED
+      error_name = "AUTH_EXPIRED"
+    when Evernote::EDAM::Error::EDAMErrorCode::BAD_DATA_FORMAT
+      error_name = "BAD_DATA_FORMAT"
+    when Evernote::EDAM::Error::EDAMErrorCode::DATA_CONFLICT
+      error_name = "DATA_CONFLICT"
+    when Evernote::EDAM::Error::EDAMErrorCode::DATA_REQUIRED
+      error_name = "DATA_REQUIRED"
+    when Evernote::EDAM::Error::EDAMErrorCode::ENML_VALIDATION
+      error_name = "ENML_VALIDATION"
+    when Evernote::EDAM::Error::EDAMErrorCode::INTERNAL_ERROR
+      error_name = "INTERNAL_ERROR"
+    when Evernote::EDAM::Error::EDAMErrorCode::INVALID_AUTH
+      error_name = "INVALID_AUTH"
+    when Evernote::EDAM::Error::EDAMErrorCode::LIMIT_REACHED
+      error_name = "LIMIT_REACHED"
+    when Evernote::EDAM::Error::EDAMErrorCode::PERMISSION_DENIED
+      error_name = "PERMISSION_DENIED"
+    when Evernote::EDAM::Error::EDAMErrorCode::QUOTA_REACHED
+      error_name = "QUOTA_REACHED"
+    when Evernote::EDAM::Error::EDAMErrorCode::SHARD_UNAVAILABLE
+      error_name = "SHARD_UNAVAILABLE"
+    when Evernote::EDAM::Error::EDAMErrorCode::UNKNOWN
+      error_name = "UNKNOWN"
+    when Evernote::EDAM::Error::EDAMErrorCode::VALID_VALUES
+      error_name = "VALID_VALUES"
+    when Evernote::EDAM::Error::EDAMErrorCode::VALUE_MAP
+      error_name = "VALUE_MAP"
+    when Evernote::EDAM::Error::EDAMErrorCode::RATE_LIMIT_REACHED
+      error_name = "RATE_LIMIT_REACHED"
+      e.message = "Rate limit reached. Please retry in #{e.rateLimitDuration} seconds"
+    end
+    rv = "Error code was: #{error_name}[#{e.errorCode}] and parameter: [#{e.message}]"
+  end
 end

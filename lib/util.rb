@@ -1,11 +1,15 @@
 require 'yaml/store'
 
 def verbose(msg)
-  puts msg if $enwrite_verbose
+  puts "Enwrite [VERBOSE]: " + msg if $enwrite_verbose
 end
 
 def error(msg)
-  $stderr.puts msg
+  $stderr.puts "Enwrite [ERROR]: " + msg
+end
+
+def msg(msg)
+  puts "Enwrite [INFO]: " + msg
 end
 
 def config_file

@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-15 23:26:57 diego>
+# Time-stamp: <2015-04-16 14:53:49 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -87,8 +87,8 @@ $enwrite_verbose = options.verbose
 
 verbose("Options: " + options.to_s)
 
-if not (options.notebook or options.searchexp)
-  $stderr.puts "You have to specify at least one of --notebook or --search"
+if not (options.notebook or options.searchexp or options.forceauth)
+  error "You have to specify at least one of --notebook, --search or --auth"
   exit(1)
 end
 exps = [ options.searchexp ? options.searchexp : nil,
@@ -100,69 +100,87 @@ searchexp = exps.join(' ')
 verbose "Output dir: #{options.outdir}"
 verbose "Search expression: #{searchexp}"
 
-# Initialize Evernote access
-Evernote_utils.init(options.forceauth, options.authtoken)
-
-updatecount_index = "updatecount_#{searchexp}"
-latestUpdateCount = config(updatecount_index, 0)
-if options.rebuild_all
-  puts "Processing ALL notes (--rebuild-all)."
-  latestUpdateCount = 0
-end
-
-verbose "Latest stored update count for #{searchexp}: #{latestUpdateCount}"
-
-currentState = Evernote_utils.noteStore.getSyncState(Evernote_utils.authToken)
-currentUpdateCount = currentState.updateCount
-
-verbose "Current update count for the account: #{currentUpdateCount}"
-
-if (currentUpdateCount > latestUpdateCount)
-  puts "Reading updated notes from #{searchexp}"
-
-  filter = Evernote::EDAM::NoteStore::NoteFilter.new
-  filter.words = searchexp
-  filter.order = Evernote::EDAM::Type::NoteSortOrder::UPDATE_SEQUENCE_NUMBER
-  filter.ascending = false
-
-  spec = Evernote::EDAM::NoteStore::NotesMetadataResultSpec.new
-  spec.includeTitle = true
-  spec.includeCreated = true
-  spec.includeTagGuids = true
-  spec.includeContentLength = true
-  spec.includeUpdateSequenceNum = true
-  spec.includeDeleted = true
-
-  results = Evernote_utils.noteStore.findNotesMetadata(Evernote_utils.authToken,
-                                                       filter,
-                                                       0,
-                                                       Evernote::EDAM::Limits::EDAM_USER_NOTES_MAX,
-                                                       spec)
-
-  # Get also deleted notes so we can remove from the blog
-  filter.inactive = true
-  delresults = Evernote_utils.noteStore.findNotesMetadata(Evernote_utils.authToken,
-                                                          filter,
-                                                          0,
-                                                          Evernote::EDAM::Limits::EDAM_USER_NOTES_MAX,
-                                                          spec)
+begin
   
-  hugo = Hugo.new(options.outdir)
+  # Initialize Evernote access
+  Evernote_utils.init(options.forceauth, options.authtoken)
+
+  if not searchexp # Only --auth was specified
+    exit 0
+  end
   
-  (results.notes + delresults.notes).select {
-    |note| note.updateSequenceNum > latestUpdateCount
-  }.sort_by {
-    |note| note.updateSequenceNum
-  }.each do |metadata|
-    verbose "######################################################################"
-    note = Evernote_utils.getWholeNote(metadata)
-    note.tagNames = note.tagNames - options.removetags
-    # This either creates or deletes posts as appropriate
-    hugo.output_note(note)
+  updatecount_index = "updatecount_#{searchexp}"
+  latestUpdateCount = config(updatecount_index, 0)
+  if options.rebuild_all
+    msg "Processing ALL notes (--rebuild-all)."
+    latestUpdateCount = 0
   end
 
-  # Persist the latest updatecount for next time
-  setconfig(updatecount_index, currentUpdateCount)
-else
-  puts "No updated notes for #{searchexp}"
-end
+  verbose "Latest stored update count for #{searchexp}: #{latestUpdateCount}"
+
+  currentState = Evernote_utils.noteStore.getSyncState(Evernote_utils.authToken)
+  currentUpdateCount = currentState.updateCount
+
+  verbose "Current update count for the account: #{currentUpdateCount}"
+
+  if (currentUpdateCount > latestUpdateCount)
+    msg "Reading updated notes from #{searchexp}"
+
+    filter = Evernote::EDAM::NoteStore::NoteFilter.new
+    filter.words = searchexp
+    filter.order = Evernote::EDAM::Type::NoteSortOrder::UPDATE_SEQUENCE_NUMBER
+    filter.ascending = false
+
+    spec = Evernote::EDAM::NoteStore::NotesMetadataResultSpec.new
+    spec.includeTitle = true
+    spec.includeCreated = true
+    spec.includeTagGuids = true
+    spec.includeContentLength = true
+    spec.includeUpdateSequenceNum = true
+    spec.includeDeleted = true
+
+    results = Evernote_utils.noteStore.findNotesMetadata(Evernote_utils.authToken,
+                                                         filter,
+                                                         0,
+                                                         Evernote::EDAM::Limits::EDAM_USER_NOTES_MAX,
+                                                         spec)
+
+    # Get also deleted notes so we can remove from the blog
+    filter.inactive = true
+    delresults = Evernote_utils.noteStore.findNotesMetadata(Evernote_utils.authToken,
+                                                            filter,
+                                                            0,
+                                                            Evernote::EDAM::Limits::EDAM_USER_NOTES_MAX,
+                                                            spec)
+    
+    hugo = Hugo.new(options.outdir)
+    
+    (results.notes + delresults.notes).select {
+      |note| note.updateSequenceNum > latestUpdateCount
+    }.sort_by {
+      |note| note.updateSequenceNum
+    }.each do |metadata|
+      verbose "######################################################################"
+      note = Evernote_utils.getWholeNote(metadata)
+      note.tagNames = note.tagNames - options.removetags
+      # This either creates or deletes posts as appropriate
+      hugo.output_note(note)
+    end
+    # Persist the latest updatecount for next time
+    setconfig(updatecount_index, currentUpdateCount)
+
+    exit 0
+  else
+    msg "No updated notes for #{searchexp}"
+    exit 1
+  end
+rescue Evernote::EDAM::Error::EDAMUserException => e
+  #the exceptions that come back from Evernote are hard to read, but really important to keep track of
+  msg = "Caught an exception from Evernote trying to create a note.  #{Evernote_utils.translate_error(e)}"
+  raise msg
+rescue Evernote::EDAM::Error::EDAMSystemException => e
+  #the exceptions that come back from Evernote are hard to read, but really important to keep track of
+  msg = "Caught an exception from Evernote trying to create a note.  #{Evernote_utils.translate_error(e)}"
+  raise msg
+end      
+

@@ -40,14 +40,14 @@ class Hugo < Output
   end
 
   def output_note(note)
-    puts "Found note '#{note.title}'"
+    msg "Found note '#{note.title}'"
     verbose "Created: #{Time.at(note.created/1000)}" if note.created
     verbose "Deleted: #{Time.at(note.deleted/1000)}" if note.deleted
     verbose "Content length: #{note.contentLength}"  if note.contentLength
 
     markdown = note.tagNames.include?(@markdown_tag)
     if markdown
-      puts "    It has the '#{ @markdown_tag }' tag, so I will interpret it as markdown"
+      msg "    It has the '#{ @markdown_tag }' tag, so I will interpret it as markdown"
       note.tagNames -= [ @markdown_tag ]
     end
 
@@ -86,7 +86,7 @@ class Hugo < Output
           fname = $1
           # If the post has been deleted, simply remove the file
           if note.deleted
-            puts "    This note has been deleted, removing its file #{fname}"
+            msg "    This note has been deleted, removing its file #{fname}"
             File.delete(fname)
             return
           end
@@ -110,15 +110,15 @@ class Hugo < Output
           File.delete(fname)
           if note.deleted
             # ...and if the post has been deleted, leave it removed
-            puts "    This note has been deleted, removing its file #{fname}"
+            msg "    This note has been deleted, removing its file #{fname}"
             return
           else
             # ...otherwise regenerate it
-            puts "   ### File existed already, deleting and regenerating"
+            msg "   File existed already, deleting and regenerating"
             redo
           end
         else
-          error "   ### Hugo returned an error when trying to create this post - skipping it: #{output}"
+          error "   Hugo returned an error when trying to create this post - skipping it: #{output}"
           return
         end
       end

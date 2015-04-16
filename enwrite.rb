@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-15 23:10:51 diego>
+# Time-stamp: <2015-04-15 23:26:57 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -17,15 +17,26 @@ require "optparse"
 require "ostruct"
 require 'util'
 
+$enwrite_version = "0.0.1"
+
 options = OpenStruct.new
 options.removetags = []
 options.verbose = false
 
 opts = OptionParser.new do |opts|
-  opts.banner = "Usage: #{$0} [options] (at least one of -n or -s has to be specified)"
+  def opts.version_string
+    "Enwrite v#{$enwrite_version}"
+  end
+  
+  opts.banner = "#{opts.version_string}\n\nUsage: #{$0} [options] (at least one of -n or -s has to be specified)"
 
   def opts.show_usage
     puts self
+    exit
+  end
+
+  def opts.show_version
+    puts version_string
     exit
   end
 
@@ -66,6 +77,7 @@ opts = OptionParser.new do |opts|
           "Process all notes that match the given conditions (normally only updated",
           "notes are processed)") { options.rebuild_all = true }
   opts.on_tail("-v", "--verbose", "Verbose mode") { options.verbose=true }
+  opts.on_tail("--version", "Show version") { opts.show_version }
   opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
 end
 

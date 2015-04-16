@@ -116,6 +116,8 @@ class ENML_Listener
       @output.gsub!(/^\s+$/, '')
       @output.gsub!(/\n+/, "\n")
       @output.gsub!(/<br[^>]*\/>/, "\n")
+      @output.gsub!(/“/, '"')
+      @output.gsub!(/”/, '"')
       # ...two passes of decoding for text output.
       @output = decoder.decode(@output)
     end

@@ -2,7 +2,7 @@
 # Evernote access utilities
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-31 21:13:52 diego>
+# Time-stamp: <2015-04-15 21:49:21 diego>
 
 # Load libraries required by the Evernote OAuth
 require 'oauth'
@@ -19,9 +19,6 @@ class Evernote_utils
   
   # Connect to Sandbox server?
   SANDBOX = false
-
-  # File where to store and look for the auth token
-  TOKENFILE = "#{ENV['HOME']}/.enwrite-auth-token"
 
   # Environment variable in which to look for the token
   ENVVAR = 'ENWRITE_AUTH_TOKEN'
@@ -56,22 +53,19 @@ token. Please enter that token now.")
     puts("Thank you! Your access token is the following string:
 #{access_token.token}
 
-I can store the token for you in #{TOKENFILE},
+I can store the token for you in the config file (#{config_file}),
 then enwrite will use it automatically in the future.
 ")
     print "Would you like me to do that for you now (Y/n)? "
     $stdout.flush
     yesno = gets.chomp
     if yesno =~ /^[yY]/
-      File.open(TOKENFILE, "w") do |f|
-        f.puts(access_token.token)
-      end
+      setconfig(:evernote_auth_token, access_token.token)
       puts "Token stored."
     else
       puts "OK, I won't store the token, just use it for now.
 
-You can also store it in the ENWRITE_AUTH_TOKEN environment variable, or store
-it yourself later in #{TOKENFILE} if you want to keep it around."
+You can also store it in the ENWRITE_AUTH_TOKEN environment variable."
     end
     # Cancel force mode after we've gotten the token
     @@forceAuth = false
@@ -84,11 +78,8 @@ it yourself later in #{TOKENFILE} if you want to keep it around."
       return self.interactiveGetToken
     elsif not ENV[ENVVAR].nil?
       return ENV[ENVVAR]
-    elsif File.exists?(TOKENFILE)
-        File.open(TOKENFILE, "r") do |f|
-          token = f.gets.chomp
-          return token
-          end
+    elsif not config(:evernote_auth_token).nil?
+      return config(:evernote_auth_token)
     else
       return self.interactiveGetToken
     end

@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-10 01:59:34 diego>
+# Time-stamp: <2015-04-15 22:54:48 diego>
 
 require 'output'
 require 'output/filters'
@@ -41,8 +41,9 @@ class Hugo < Output
 
   def output_note(note)
     puts "Found note '#{note.title}'"
-    verbose "Created: #{Time.at(note.created/1000)}"
-    verbose "Content length: #{note.contentLength}"
+    verbose "Created: #{Time.at(note.created/1000)}" if note.created
+    verbose "Deleted: #{Time.at(note.deleted/1000)}" if note.deleted
+    verbose "Content length: #{note.contentLength}"  if note.contentLength
 
     markdown = note.tagNames.include?(@markdown_tag)
     if markdown
@@ -71,6 +72,8 @@ class Hugo < Output
 
     # Run hugo to create the file, then read it back it to update the front matter
     # with our tags.
+    # We run "hugo new" also for deleted notes so that hugo gives us the filename
+    # to delete.
     fname = nil
     frontmatter = nil
     Dir.chdir(@base_dir) do
@@ -79,8 +82,15 @@ class Hugo < Output
       while true
         output = %x(#{@hugo_cmd} new -f yaml '#{type}#{date}-#{note.title}.#{(markdown ? "md" : "html")}')
         if output =~ /^(.+) created$/
-          # Load the frontmatter
+          # Get the filename
           fname = $1
+          # If the post has been deleted, simply remove the file
+          if note.deleted
+            puts "    This note has been deleted, removing its file #{fname}"
+            File.delete(fname)
+            return
+          end
+          # Load the frontmatter
           frontmatter = YAML.load_file(fname)
           # Update title because Hugo gets it wrong sometimes depending on the characters in the title, and to get rid of the date we put in the filename
           frontmatter['title'] = note.title
@@ -95,10 +105,18 @@ class Hugo < Output
           frontmatter['menu'] = 'main' if inmainmenu
           break
         elsif output =~ /ERROR: \S+ (.+) already exists/
-          # Remove and regenerate existing files
-          puts "   ### File existed already, deleting and retrying"
-          File.delete($1)
-          redo
+          fname = $1
+          # If the file existed already, remove it...
+          File.delete(fname)
+          if note.deleted
+            # ...and if the post has been deleted, leave it removed
+            puts "    This note has been deleted, removing its file #{fname}"
+            return
+          else
+            # ...otherwise regenerate it
+            puts "   ### File existed already, deleting and regenerating"
+            redo
+          end
         else
           error "   ### Hugo returned an error when trying to create this post - skipping it: #{output}"
           return

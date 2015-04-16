@@ -37,6 +37,8 @@ Populate it with contents from Evernote:
 
     $ cd ~/tmp/enwrite
     $ ./enwrite.rb -h
+    Enwrite v0.0.1
+    
     Usage: ./enwrite.rb [options] (at least one of -n or -s has to be specified)
     
         -n, --notebook NOTEBOOK          Process notes from specified notebook.
@@ -50,9 +52,12 @@ Populate it with contents from Evernote:
                                          If no argument given, defaults to --tag.
             --auth [TOKEN]               Force Evernote reauthentication (will happen automatically if needed).
                                          If TOKEN is given, use it, otherwise get one interactively.
+            --rebuild-all                Process all notes that match the given conditions (normally only updated
+                                         notes are processed)
         -v, --verbose                    Verbose mode
+            --version                    Show version
         -h, --help                       Shows this help message
-
+    
 Generate posts from all notes tagged `published` in notebook
 `my_notebook`:
 

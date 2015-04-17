@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-16 23:03:53 diego>
+# Time-stamp: <2015-04-17 00:44:02 diego>
 
 require 'output'
 require 'output/filters'
@@ -44,6 +44,7 @@ class Hugo < Output
     verbose "Created: #{Time.at(note.created/1000)}" if note.created
     verbose "Deleted: #{Time.at(note.deleted/1000)}" if note.deleted
     verbose "Content length: #{note.contentLength}"  if note.contentLength
+    verbose "Clipped from: #{note.attributes.sourceURL}" if note.attributes.sourceURL
 
     markdown = note.tagNames.include?(@markdown_tag)
     if markdown
@@ -136,6 +137,9 @@ class Hugo < Output
       if @use_filters
         verbose "Running filters on text"
         output = run_filters(output)
+      end
+      if note.attributes.sourceURL
+        f.puts(%(<p class="clip-attribute">via <a href="#{note.attributes.sourceURL}">#{note.attributes.sourceURL}</a></p>))
       end
       f.puts(output)
       enml.resource_files.each do |resfile|

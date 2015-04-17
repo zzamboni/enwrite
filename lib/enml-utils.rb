@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-16 14:33:17 diego>
+# Time-stamp: <2015-04-16 21:55:50 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -110,6 +110,7 @@ class ENML_Listener
     # One pass of entity decoding for HTML output...
     @output = decoder.decode(@output)
     if @to_text
+      # Clean up some tags, extra empty lines, prettyfied characters, etc.
       @output.gsub!(/<\/?span[^>]*>/, '')
       @output.gsub!(/\t*<div[^>]*>/, '')
       @output.gsub!(/<\/div>/, "\n")
@@ -118,6 +119,8 @@ class ENML_Listener
       @output.gsub!(/<br[^>]*\/>/, "\n")
       @output.gsub!(/“/, '"')
       @output.gsub!(/”/, '"')
+      @output.gsub!(/‘/, "'")
+      @output.gsub!(/’/, "'")
       # ...two passes of decoding for text output.
       @output = decoder.decode(@output)
     end

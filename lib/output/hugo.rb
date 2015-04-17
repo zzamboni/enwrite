@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-15 22:54:48 diego>
+# Time-stamp: <2015-04-16 23:03:53 diego>
 
 require 'output'
 require 'output/filters'
@@ -47,7 +47,7 @@ class Hugo < Output
 
     markdown = note.tagNames.include?(@markdown_tag)
     if markdown
-      msg "    It has the '#{ @markdown_tag }' tag, so I will interpret it as markdown"
+      msg "   It has the '#{ @markdown_tag }' tag, so I will interpret it as markdown"
       note.tagNames -= [ @markdown_tag ]
     end
 
@@ -86,7 +86,7 @@ class Hugo < Output
           fname = $1
           # If the post has been deleted, simply remove the file
           if note.deleted
-            msg "    This note has been deleted, removing its file #{fname}"
+            msg "   This note has been deleted from Evernote, removing its file #{fname}"
             File.delete(fname)
             return
           end
@@ -110,15 +110,15 @@ class Hugo < Output
           File.delete(fname)
           if note.deleted
             # ...and if the post has been deleted, leave it removed
-            msg "    This note has been deleted, removing its file #{fname}"
+            msg "   This note has been deleted from Evernote, removing its file #{fname}"
             return
           else
             # ...otherwise regenerate it
-            msg "   File existed already, deleting and regenerating"
+            verbose "   File existed already, deleting and regenerating"
             redo
           end
         else
-          error "   Hugo returned an error when trying to create this post - skipping it: #{output}"
+          error "   Hugo returned unknown output when trying to create this post - skipping it: #{output}"
           return
         end
       end

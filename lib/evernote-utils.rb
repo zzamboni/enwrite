@@ -2,7 +2,7 @@
 # Evernote access utilities
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-16 14:56:08 diego>
+# Time-stamp: <2015-04-16 23:09:37 diego>
 
 # Load libraries required by the Evernote OAuth
 require 'oauth'
@@ -155,12 +155,13 @@ You can also store it in the ENWRITE_AUTH_TOKEN environment variable."
       taglist = self.noteStore.listTags(self.authToken)
       # Create a hash for easier reference
       @@tags = {}
+      tagstr = ""
       for t in taglist
         @@tags[t.guid] = t
         @@tags[t.name] = t
-        print "#{t.name} " if $enwrite_verbose
+        tagstr += "#{t.name} "
       end
-      verbose("")
+      verbose tagstr
     end
     return @@tags
   end

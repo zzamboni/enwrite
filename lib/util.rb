@@ -30,13 +30,11 @@ def config_store
 end
 
 # Get a persistent config value
-def config(key, defval=nil)
-  store = config_store
+def config(key, defval=nil, store=config_store)
   return store.transaction { store.fetch(key, defval) }
 end
 
 # Set a persistent config value
-def setconfig(key, val)
-  store = config_store
+def setconfig(key, val, store=config_store)
   return store.transaction { store[key] = val }
 end  

@@ -2,12 +2,13 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-17 00:44:02 diego>
+# Time-stamp: <2015-04-20 21:08:29 diego>
 
 require 'output'
 require 'output/filters'
 require 'enml-utils'
 require 'fileutils'
+require 'yaml/store'
 
 include Filters
 
@@ -19,6 +20,14 @@ class Hugo < Output
     #    @page_dir = opts[:page_dir] || @content_dir
     @use_filters = opts[:use_filters] || true
 
+    # Persistent store for this base_dir
+    datadir = "#{base_dir}/data"
+    FileUtils.mkdir_p datadir
+    @config_store = YAML::Store.new("#{datadir}/enwrite_data.yaml")
+
+    # Initialize GUID-to-filename map if needed
+    @config_store.transaction { @config_store[:note_files] = {} unless @config_store[:note_files] }
+    
     # These are [ realpath, urlpath ]
     @static_dir = opts[:static_dir] || [ "#{@base_dir}/static", "/" ]
     @img_dir = opts[:img_dir] || [ "#{@static_dir[0]}/img", "/img" ]
@@ -71,6 +80,29 @@ class Hugo < Output
       note.tagNames -= [ '_mainmenu' ]
     end
 
+    # Get our note GUID-to-filename map
+    note_files = config(:note_files, {}, @config_store)
+    
+    # Determine the name I would assign to this note when published to Hugo
+    date = Time.at(note.created/1000).strftime('%F')
+    post_filename = "#{type}#{date}-#{note.title}.#{markdown ? 'md' : 'html'}"
+    # Do we already have a post for this note (by GUID)? If so, we remove the
+    # old file since it will be regenerated anyway, which also takes care of the
+    # case when the note was renamed and the filename will change, to avoid
+    # post duplication. If the note has been deleted, we just delete the
+    # old filename and stop here.
+    oldfile = note_files[note.guid]
+    if oldfile
+      verbose "   I already had a file for note #{note.guid}, removing #{oldfile}"
+      File.delete(oldfile)
+      note_files.delete(note.guid)
+      setconfig(:note_files, note_files, @config_store)
+      if note.deleted
+        msg "   This note has been deleted from Evernote, removing its file #{oldfile}"
+        return
+      end
+    end
+    
     # Run hugo to create the file, then read it back it to update the front matter
     # with our tags.
     # We run "hugo new" also for deleted notes so that hugo gives us the filename
@@ -78,19 +110,12 @@ class Hugo < Output
     fname = nil
     frontmatter = nil
     Dir.chdir(@base_dir) do
-      date = Time.at(note.created/1000).strftime('%F')
       # Force -f yaml because it's so much easier to process
       while true
-        output = %x(#{@hugo_cmd} new -f yaml '#{type}#{date}-#{note.title}.#{(markdown ? "md" : "html")}')
+        output = %x(#{@hugo_cmd} new -f yaml '#{post_filename}')
         if output =~ /^(.+) created$/
-          # Get the filename
+          # Get the full filename as reported by Hugo
           fname = $1
-          # If the post has been deleted, simply remove the file
-          if note.deleted
-            msg "   This note has been deleted from Evernote, removing its file #{fname}"
-            File.delete(fname)
-            return
-          end
           # Load the frontmatter
           frontmatter = YAML.load_file(fname)
           # Update title because Hugo gets it wrong sometimes depending on the characters in the title, and to get rid of the date we put in the filename
@@ -106,18 +131,16 @@ class Hugo < Output
           frontmatter['menu'] = 'main' if inmainmenu
           break
         elsif output =~ /ERROR: \S+ (.+) already exists/
+          # Get the full filename as reported by Hugo
           fname = $1
-          # If the file existed already, remove it...
+          # If the file existed already, remove it and regenerate it
           File.delete(fname)
-          if note.deleted
-            # ...and if the post has been deleted, leave it removed
-            msg "   This note has been deleted from Evernote, removing its file #{fname}"
-            return
-          else
-            # ...otherwise regenerate it
-            verbose "   File existed already, deleting and regenerating"
-            redo
-          end
+          # This shouldn't happen due to the index check above
+          error "   I found a file that should not be there (#{fname}). This might indicate"
+          error "   an inconsistency in my internal note-to-file map. Please re-run with"
+          error "   --rebuild-all to regenerate it. I am deleting the file and continuing"
+          error "   for now, but please review the results carefully."
+          redo
         else
           error "   Hugo returned unknown output when trying to create this post - skipping it: #{output}"
           return
@@ -152,5 +175,8 @@ class Hugo < Output
     end
 
     verbose "Wrote file #{fname}"
+    note_files[note.guid] = fname
+    setconfig(:note_files, note_files, @config_store)
+    
   end
 end

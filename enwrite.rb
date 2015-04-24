@@ -136,7 +136,7 @@ begin
   verbose "Current update count for the account: #{currentUpdateCount}"
 
   if (currentUpdateCount > latestUpdateCount)
-    msg "Reading updated notes from #{searchexp}"
+    msg "Reading #{options.rebuild_all ? 'all' : 'updated'} notes that match #{searchexp}"
 
     filter = Evernote::EDAM::NoteStore::NoteFilter.new
     filter.words = searchexp
@@ -183,7 +183,7 @@ begin
 
     exit 0
   else
-    msg "No updated notes for #{searchexp}"
+    msg "No updated notes that match #{searchexp}"
     exit 1
   end
 rescue Evernote::EDAM::Error::EDAMUserException => e

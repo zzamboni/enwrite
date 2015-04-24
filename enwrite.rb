@@ -4,14 +4,13 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-16 14:53:49 diego>
+# Time-stamp: <2015-04-24 00:26:46 diego>
 
 require 'rubygems'
 require 'bundler/setup'
 
 require "digest/md5"
 require 'evernote-thrift'
-require 'output/hugo'
 require 'evernote-utils'
 require "optparse"
 require "ostruct"
@@ -22,6 +21,7 @@ $enwrite_version = "0.0.1"
 options = OpenStruct.new
 options.removetags = []
 options.verbose = false
+options.outputplugin = 'hugo'
 
 opts = OptionParser.new do |opts|
   def opts.version_string
@@ -58,6 +58,11 @@ opts = OptionParser.new do |opts|
     options.tag = nil
     options.notebook = nil
   end
+  PLUGINS = %w[hugo]
+  opts.on("-p", "--output-plugin PLUGIN", PLUGINS,
+          "Output plugin to use (Valid values: #{PLUGINS.join(', ')})") do |plugin|
+    options.outputplugin = plugin
+  end
   opts.on("-o", "--output-dir OUTDIR",
           "Base dir of hugo output installation") do |outdir|
     options.outdir = outdir
@@ -82,6 +87,13 @@ opts = OptionParser.new do |opts|
 end
 
 opts.parse!
+
+begin
+  eval "require 'output/#{options.outputplugin}'"
+rescue LoadError
+  error "There was an error loading output module '#{plugin}': #{e.to_s}"
+  exit 1
+end
 
 $enwrite_verbose = options.verbose
 
@@ -153,7 +165,7 @@ begin
                                                             Evernote::EDAM::Limits::EDAM_USER_NOTES_MAX,
                                                             spec)
     
-    hugo = Hugo.new(options.outdir)
+    writer = eval "#{options.outputplugin.capitalize}.new(options.outdir)"
     
     (results.notes + delresults.notes).select {
       |note| note.updateSequenceNum > latestUpdateCount
@@ -164,7 +176,7 @@ begin
       note = Evernote_utils.getWholeNote(metadata)
       note.tagNames = note.tagNames - options.removetags
       # This either creates or deletes posts as appropriate
-      hugo.output_note(note)
+      writer.output_note(note)
     end
     # Persist the latest updatecount for next time
     setconfig(updatecount_index, currentUpdateCount)

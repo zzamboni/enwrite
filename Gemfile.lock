@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     colorize (0.7.5)
+    deep_merge (1.0.1)
     evernote-thrift (1.25.1)
     evernote_oauth (0.2.3)
       evernote-thrift
@@ -14,6 +15,7 @@ PLATFORMS
 
 DEPENDENCIES
   colorize
+  deep_merge
   evernote-thrift
   evernote_oauth
   htmlentities

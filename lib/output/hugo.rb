@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-20 21:08:29 diego>
+# Time-stamp: <2015-04-28 08:42:46 diego>
 
 require 'output'
 require 'output/filters'
@@ -13,15 +13,15 @@ require 'yaml/store'
 include Filters
 
 class Hugo < Output
-  def initialize(base_dir, opts = {})
-    @base_dir = base_dir
-    #    @content_dir = opts[:content_dir] || "#{@base_dir}/content"
-    #    @blog_dir = opts[:blog_dir] || "#{@content_dir}/post"
-    #    @page_dir = opts[:page_dir] || @content_dir
-    @use_filters = opts[:use_filters] || true
+  def initialize(opts = {})
+    @base_dir = opts['base_dir']
+    unless @base_dir
+      error "The 'base_dir' option of the Hugo plugin must be set!"
+    end
+    @use_filters = opts['use_filters'] || true
 
     # Persistent store for this base_dir
-    datadir = "#{base_dir}/data"
+    datadir = "#{@base_dir}/data"
     FileUtils.mkdir_p datadir
     @config_store = YAML::Store.new("#{datadir}/enwrite_data.yaml")
 
@@ -29,23 +29,28 @@ class Hugo < Output
     @config_store.transaction { @config_store[:note_files] = {} unless @config_store[:note_files] }
     
     # These are [ realpath, urlpath ]
-    @static_dir = opts[:static_dir] || [ "#{@base_dir}/static", "/" ]
-    @img_dir = opts[:img_dir] || [ "#{@static_dir[0]}/img", "/img" ]
-    @audio_dir = opts[:audio_dir] || [ "#{@static_dir[0]}/audio", "/audio" ]
-    @video_dir = opts[:video_dir] || [ "#{@static_dir[0]}/video", "/video" ]
-    @files_dir = opts[:files_dir] || [ "#{@static_dir[0]}/files", "/files" ]
+    @static_dir = opts['static_dir'] || [ "#{@base_dir}/static", "/" ]
+    @img_dir = opts['img_dir'] || [ "#{@static_dir[0]}/img", "/img" ]
+    @audio_dir = opts['audio_dir'] || [ "#{@static_dir[0]}/audio", "/audio" ]
+    @video_dir = opts['video_dir'] || [ "#{@static_dir[0]}/video", "/video" ]
+    @files_dir = opts['files_dir'] || [ "#{@static_dir[0]}/files", "/files" ]
 
     # Tag-to-type map
-    @tag_to_type = { "default" => "post/",
-                     "post" => "post/",
-                     "page" => "" }
-    @tag_to_type_order = [ "post", "page", "default" ]
+    @tag_to_type = opts['tag_to_type'] || { "default" => "post/",
+                                            "post" => "post/",
+                                            "page" => "" }
+    @tag_to_type_order = opts['tag_to_type_order'] || [ "post", "page", "default" ]
 
+    @tag_to_type_order.each { |type|
+      @tag_to_type[type] = "" unless @tag_to_type.include?(type)
+      @tag_to_type[type] = "" if @tag_to_type[type].nil?
+    }
+    
     # Markdown tag
-    @markdown_tag = "markdown"
+    @markdown_tag = opts['markdown_tag'] || "markdown"
 
     # Command to run hugo
-    @hugo_cmd = "hugo"
+    @hugo_cmd = opts['hugo_cmd'] || "hugo"
   end
 
   def output_note(note)
@@ -94,7 +99,7 @@ class Hugo < Output
     oldfile = note_files[note.guid]
     if oldfile
       verbose "   I already had a file for note #{note.guid}, removing #{oldfile}"
-      File.delete(oldfile)
+      File.delete(oldfile) if File.exist?(oldfile)
       note_files.delete(note.guid)
       setconfig(:note_files, note_files, @config_store)
       if note.deleted

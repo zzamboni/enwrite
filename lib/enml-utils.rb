@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-16 21:55:50 diego>
+# Time-stamp: <2015-04-28 08:27:39 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -121,6 +121,7 @@ class ENML_Listener
       @output.gsub!(/”/, '"')
       @output.gsub!(/‘/, "'")
       @output.gsub!(/’/, "'")
+      @output.gsub!(/\u{a0}/, " ")  # Unicode non-breaking space
       # ...two passes of decoding for text output.
       @output = decoder.decode(@output)
     end
@@ -135,7 +136,7 @@ class ENML_Listener
 end
 
 class ENML_utils
-  def initialize(text, resources = nil, img_dir, audio_dir, video_dir, files_dir)
+  def initialize(text, resources = nil, img_dir = nil, audio_dir = nil, video_dir = nil, files_dir = nil)
     @text = text or ""
     @resources = resources or []
     @img_dir = img_dir

@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-24 00:26:46 diego>
+# Time-stamp: <2015-04-28 08:34:16 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -15,6 +15,8 @@ require 'evernote-utils'
 require "optparse"
 require "ostruct"
 require 'util'
+require 'yaml'
+require 'deep_merge'
 
 $enwrite_version = "0.0.1"
 
@@ -22,6 +24,7 @@ options = OpenStruct.new
 options.removetags = []
 options.verbose = false
 options.outputplugin = 'hugo'
+options.configtag = '_enwrite_config'
 
 opts = OptionParser.new do |opts|
   def opts.version_string
@@ -81,6 +84,10 @@ opts = OptionParser.new do |opts|
   opts.on("--rebuild-all",
           "Process all notes that match the given conditions (normally only updated",
           "notes are processed)") { options.rebuild_all = true }
+  opts.on("--config-tag TAG",
+          "Specify tag to determine config notes (default: #{options.configtag})") { |conftag|
+    options.configtag = conftag
+  }
   opts.on_tail("-v", "--verbose", "Verbose mode") { options.verbose=true }
   opts.on_tail("--version", "Show version") { opts.show_version }
   opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
@@ -164,8 +171,37 @@ begin
                                                             0,
                                                             Evernote::EDAM::Limits::EDAM_USER_NOTES_MAX,
                                                             spec)
-    
-    writer = eval "#{options.outputplugin.capitalize}.new(options.outdir)"
+
+    # Go through the list looking for config notes, parse them and remove
+    # them from the list
+    enwriteconfig = { 'hugo' => {
+                        'base_dir' => options.outdir,
+                      },
+                    }
+
+    if Evernote_utils.tags.include?(options.configtag)
+      config_tag_guid = Evernote_utils.tags[options.configtag].guid
+      results.notes.select { |note|
+        note.tagGuids.include?(config_tag_guid)
+      }.each { |confignotemd|
+        msg "Found config note '#{confignotemd.title}'"
+        confignote = Evernote_utils.getWholeNote(confignotemd)
+        enml = ENML_utils.new(confignote.content)
+        configtext = enml.to_text
+        verbose "   Config note text: '#{configtext}'"
+        configyaml = YAML.load(configtext)
+        verbose "   Config note YAML: #{configyaml}"
+        enwriteconfig.deep_merge!(configyaml)
+        verbose "   enwriteconfig = #{enwriteconfig}"
+        results.notes.delete(confignotemd)
+        results.totalNotes -= 1
+      }
+    end
+
+    verbose "Final enwrite config: #{enwriteconfig}"
+
+    verbose "Evaluating: #{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"
+    writer = eval "#{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"
     
     (results.notes + delresults.notes).select {
       |note| note.updateSequenceNum > latestUpdateCount

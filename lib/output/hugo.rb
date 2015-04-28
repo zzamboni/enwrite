@@ -123,6 +123,11 @@ class Hugo < Output
         if output =~ /^(.+) created$/
           # Get the full filename as reported by Hugo
           fname = $1
+          if note.deleted
+            File.delete(fname)
+            msg "   This note has been deleted from Evernote, removing its file #{oldfile}"
+            return
+          end
           # Load the frontmatter
           frontmatter = YAML.load_file(fname)
           # Update title because Hugo gets it wrong sometimes depending on the characters in the title, and to get rid of the date we put in the filename

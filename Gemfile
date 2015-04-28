@@ -3,6 +3,13 @@ source "http://rubygems.org"
 # Example:
 #   gem "activesupport", ">= 2.3.5"
 
+gem 'evernote-thrift'
+gem 'evernote_oauth'
+gem 'htmlentities'
+gem 'oauth'
+gem 'colorize'
+gem 'deep_merge'
+
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do

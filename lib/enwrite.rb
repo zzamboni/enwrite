@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 13:34:33 diego>
+# Time-stamp: <2015-04-28 14:42:35 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -20,8 +20,15 @@ require 'deep_merge'
 
 class Enwrite
   PLUGINS = %w[hugo]
+  module Version
+    MAJOR = 0
+    MINOR = 1
+    PATCH = 0
+
+    STRING = [MAJOR, MINOR, PATCH].compact.join('.')
+  end
+  
   def self.run
-    $enwrite_version = "0.0.1"
 
     options = OpenStruct.new
     options.removetags = []
@@ -32,7 +39,7 @@ class Enwrite
 
     opts = OptionParser.new do |opts|
       def opts.version_string
-        "Enwrite v#{$enwrite_version}"
+        "Enwrite v#{Enwrite::Version::STRING}"
       end
       
       opts.banner = "#{opts.version_string}\n\nUsage: #{$0} [options] (at least one of -n or -s has to be specified)"

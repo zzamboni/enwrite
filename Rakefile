@@ -10,6 +10,7 @@ rescue Bundler::BundlerError => e
   exit e.status_code
 end
 require 'rake'
+require './lib/enwrite.rb'
 
 require 'jeweler'
 Jeweler::Tasks.new do |gem|
@@ -17,11 +18,15 @@ Jeweler::Tasks.new do |gem|
   gem.name = "enwrite"
   gem.homepage = "http://github.com/zzamboni/enwrite"
   gem.license = "MIT"
-  gem.summary = %Q{Power a web site using Evernote}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Enwrite: Power a web site using Evernote}
+  gem.description = %Q{Enwrite allows you to generate a website from contents stored in Evernote.
+At the moment only Hugo (http://gohugo.io) is supported as an output format,
+but others can be added through plugins.}
   gem.email = "diego@zzamboni.org"
   gem.authors = ["Diego Zamboni"]
   # dependencies defined in Gemfile
+  gem.executables = [ 'enwrite' ]
+  gem.version = Enwrite::Version::STRING
 end
 Jeweler::RubygemsDotOrgTasks.new
 

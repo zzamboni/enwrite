@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 08:27:39 diego>
+# Time-stamp: <2015-04-28 13:32:54 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -147,17 +147,17 @@ class ENML_utils
 
   def to_html(to_text=false)
     parser = Parsers::SAX2Parser.new( @text )
-    verbose "to_html input text:"
-    verbose "-----"
-    verbose @text
-    verbose "-----"
+    debug "to_html input text:"
+    debug "-----"
+    debug @text
+    debug "-----"
     listener = ENML_Listener.new(@resources, to_text, @img_dir, @audio_dir, @video_dir, @files_dir)
     parser.listen(listener)
     parser.parse
     @files = listener.files
-    verbose "to_html output:"
-    verbose listener.output
-    verbose "-----"
+    debug "to_html output:"
+    debug listener.output
+    debug "-----"
     return listener.output
   end
 

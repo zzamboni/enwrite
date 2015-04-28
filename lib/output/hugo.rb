@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 12:59:27 diego>
+# Time-stamp: <2015-04-28 13:37:47 diego>
 
 require 'output'
 require 'output/filters'
@@ -161,7 +161,7 @@ class Hugo < Output
       end
     end
 
-    verbose "Updated frontmatter: #{frontmatter.to_s}"
+    debug "Updated frontmatter: #{frontmatter.to_s}"
     
     File.open(fname, "w") do |f|
       f.write(frontmatter.to_yaml)

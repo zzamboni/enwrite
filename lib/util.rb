@@ -7,6 +7,10 @@ def verbose(msg)
   puts ("Enwrite [VERBOSE]: " + msg).blue if $enwrite_verbose
 end
 
+def debug(msg)
+  puts ("Enwrite [DEBUG]: " + msg) if $enwrite_debug
+end
+
 def error(msg)
   $stderr.puts ("Enwrite [ERROR]: " + msg).red
 end

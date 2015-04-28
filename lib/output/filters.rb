@@ -7,14 +7,14 @@ module Filters
     newtext = text
     text.scan(/(\[(\w+)([^\]]*)\])/) do |m|
       match = m[0]
-      verbose "match = #{match}"
+      debug "match = #{match}"
       filter = m[1]
       args = m[2]
       if Filters.method_defined?("filter_#{filter}")
         fn=Filters.method("filter_#{filter}")
         arg = {}
         args = HTMLEntities.new.decode(args)
-        verbose "args = #{args}"
+        debug "args = #{args}"
         args.scan(/\b(\w+)=["“]([^"]*)["”]/) { |a|
           arg[a[0]] = a[1]
         }
@@ -29,8 +29,8 @@ module Filters
         warn("Warning: nonexistent filter #{filter} used, leaving text as is") if $enwrite_verbose
       end
     end
-    verbose "After running filters:"
-    verbose newtext
+    debug "After running filters:"
+    debug newtext
     return newtext
   end
   

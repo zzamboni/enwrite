@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 13:25:42 diego>
+# Time-stamp: <2015-04-28 13:34:33 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -19,12 +19,14 @@ require 'yaml'
 require 'deep_merge'
 
 class Enwrite
-  def run
+  PLUGINS = %w[hugo]
+  def self.run
     $enwrite_version = "0.0.1"
 
     options = OpenStruct.new
     options.removetags = []
     options.verbose = false
+    options.debug = false
     options.outputplugin = 'hugo'
     options.configtag = '_enwrite_config'
 
@@ -63,7 +65,6 @@ class Enwrite
         options.tag = nil
         options.notebook = nil
       end
-      PLUGINS = %w[hugo]
       opts.on("-p", "--output-plugin PLUGIN", PLUGINS,
               "Output plugin to use (Valid values: #{PLUGINS.join(', ')})") do |plugin|
         options.outputplugin = plugin
@@ -91,6 +92,7 @@ class Enwrite
         options.configtag = conftag
       }
       opts.on_tail("-v", "--verbose", "Verbose mode") { options.verbose=true }
+      opts.on_tail("-v", "--debug", "Debug output mode") { options.debug=true }
       opts.on_tail("--version", "Show version") { opts.show_version }
       opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
     end
@@ -105,6 +107,7 @@ class Enwrite
     end
 
     $enwrite_verbose = options.verbose
+    $enwrite_debug = options.debug
 
     verbose("Options: " + options.to_s)
 
@@ -191,11 +194,11 @@ class Enwrite
             confignote = Evernote_utils.getWholeNote(confignotemd)
             enml = ENML_utils.new(confignote.content)
             configtext = enml.to_text
-            verbose "   Config note text: '#{configtext}'"
+            debug "   Config note text: '#{configtext}'"
             configyaml = YAML.load(configtext)
-            verbose "   Config note YAML: #{configyaml}"
+            debug "   Config note YAML: #{configyaml}"
             enwriteconfig.deep_merge!(configyaml)
-            verbose "   enwriteconfig = #{enwriteconfig}"
+            debug "   enwriteconfig = #{enwriteconfig}"
             results.notes.delete(confignotemd)
             results.totalNotes -= 1
           }
@@ -203,7 +206,7 @@ class Enwrite
 
         verbose "Final enwrite config: #{enwriteconfig}"
 
-        verbose "Evaluating: #{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"
+        debug "Evaluating: #{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"
         writer = eval "#{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"
         
         (results.notes + delresults.notes).select {

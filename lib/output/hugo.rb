@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 08:42:46 diego>
+# Time-stamp: <2015-04-28 12:59:27 diego>
 
 require 'output'
 require 'output/filters'
@@ -14,11 +14,13 @@ include Filters
 
 class Hugo < Output
   def initialize(opts = {})
+    @opts = opts
     @base_dir = opts['base_dir']
     unless @base_dir
       error "The 'base_dir' option of the Hugo plugin must be set!"
     end
     @use_filters = opts['use_filters'] || true
+    @rebuild_all = opts['rebuild_all'] || false
 
     # Persistent store for this base_dir
     datadir = "#{@base_dir}/data"
@@ -140,11 +142,17 @@ class Hugo < Output
           fname = $1
           # If the file existed already, remove it and regenerate it
           File.delete(fname)
+          if note.deleted
+            msg "   This note has been deleted from Evernote, removing its file #{oldfile}"
+            return
+          end
           # This shouldn't happen due to the index check above
-          error "   I found a file that should not be there (#{fname}). This might indicate"
-          error "   an inconsistency in my internal note-to-file map. Please re-run with"
-          error "   --rebuild-all to regenerate it. I am deleting the file and continuing"
-          error "   for now, but please review the results carefully."
+          unless @rebuild_all
+            error "   I found a file that should not be there (#{fname}). This might indicate"
+            error "   an inconsistency in my internal note-to-file map. Please re-run with"
+            error "   --rebuild-all to regenerate it. I am deleting the file and continuing"
+            error "   for now, but please review the results carefully."
+          end
           redo
         else
           error "   Hugo returned unknown output when trying to create this post - skipping it: #{output}"

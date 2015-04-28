@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 08:34:16 diego>
+# Time-stamp: <2015-04-28 12:58:22 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -176,6 +176,7 @@ begin
     # them from the list
     enwriteconfig = { 'hugo' => {
                         'base_dir' => options.outdir,
+                        'rebuild_all' => options.rebuild_all,
                       },
                     }
 

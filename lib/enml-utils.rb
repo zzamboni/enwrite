@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 23:59:06 diego>
+# Time-stamp: <2015-04-29 00:20:20 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -88,18 +88,17 @@ class ENML_Listener
           new_elem.add_attribute('src', new_file[:url])
           @files.push(new_file)
         end
-      elsif attributes['type'] =~ /^audio\/(.*)/
-        subtype = $1
-        new_file = process_file(attributes, 'audio', subtype)
+      elsif attributes['type'] =~ /^(audio|video)\/(.*)/
+        type = $1
+        subtype = $2
+        new_file = process_file(attributes, type, subtype)
         if new_file
-          new_elem = Element.new('audio')
+          new_elem = Element.new(type)
           new_elem.add_attribute('controls', "1")
-          new_elem.add_attributes(attributes)
           new_elem.add_element 'source', { 'src' => new_file[:url], 'type' => attributes['type'] }
+          new_elem.add_text "Sorry, your browser does not support the #{type} tag."
           @files.push(new_file)
         end
-      elsif attributes['type'] =~ /^video\//
-        error "Don't know how to handle video files yet"
       else
         error "Don't know how to handle other files yet"
       end

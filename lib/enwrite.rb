@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 14:42:35 diego>
+# Time-stamp: <2015-04-28 21:56:45 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -54,24 +54,30 @@ class Enwrite
         exit
       end
 
-      opts.separator ''
+      opts.separator "\nSearch options:"
       opts.on("-n", "--notebook NOTEBOOK",
               "Process notes from specified notebook.") do |notebook|
         options.notebook = notebook
       end
       opts.on("-t", "--tag TAG",
               "Process only notes that have this tag",
-              " within the given notebook.") do |tag|
+              "within the given notebook.") do |tag|
         options.tag = tag
+      end
+      opts.on("--remove-tags [t1,t2,t3]", Array,
+              "List of tags to remove from output posts.",
+              "If no argument given, defaults to --tag.") do |removetags|
+        options.removetags = removetags || [options.tag]
       end
       opts.on("-s", "--search SEARCHEXP",
               "Process notes that match given search",
-              " expression. If specified, --notebook",
-              " and --tag are ignored.") do |searchexp|
+              "expression. If specified, --notebook",
+              "and --tag are ignored.") do |searchexp|
         options.searchexp = searchexp
         options.tag = nil
         options.notebook = nil
       end
+      opts.separator 'Output options:'
       opts.on("-p", "--output-plugin PLUGIN", PLUGINS,
               "Output plugin to use (Valid values: #{PLUGINS.join(', ')})") do |plugin|
         options.outputplugin = plugin
@@ -80,22 +86,22 @@ class Enwrite
               "Base dir of hugo output installation") do |outdir|
         options.outdir = outdir
       end
-      opts.on("--remove-tags [t1,t2,t3]", Array,
-              "List of tags to remove from output posts.",
-              "If no argument given, defaults to --tag.") do |removetags|
-        options.removetags = removetags || [options.tag]
-      end
+      opts.on("--rebuild-all",
+              "Process all notes that match the given",
+              "conditions (normally only updated notes",
+              "are processed)") { options.rebuild_all = true }
+      opts.separator 'Other options:'
       opts.on("--auth [TOKEN]",
-              "Force Evernote reauthentication (will happen automatically if needed).",
-              "If TOKEN is given, use it, otherwise get one interactively.") do |forceauth|
+              "Force Evernote reauthentication (will",
+              "happen automatically if needed). Use",
+              "TOKEN if given, otherwise get one",
+              "interactively.") do |forceauth|
         options.forceauth = true
         options.authtoken = forceauth
       end
-      opts.on("--rebuild-all",
-              "Process all notes that match the given conditions (normally only updated",
-              "notes are processed)") { options.rebuild_all = true }
       opts.on("--config-tag TAG",
-              "Specify tag to determine config notes (default: #{options.configtag})") { |conftag|
+              "Specify tag to determine config notes",
+              "(default: #{options.configtag})") { |conftag|
         options.configtag = conftag
       }
       opts.on_tail("-v", "--verbose", "Verbose mode") { options.verbose=true }

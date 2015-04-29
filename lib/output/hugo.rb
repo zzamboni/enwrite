@@ -2,13 +2,14 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 13:37:47 diego>
+# Time-stamp: <2015-04-29 15:11:10 diego>
 
 require 'output'
 require 'output/filters'
 require 'enml-utils'
 require 'fileutils'
 require 'yaml/store'
+require 'digest'
 
 include Filters
 
@@ -55,6 +56,41 @@ class Hugo < Output
     @hugo_cmd = opts['hugo_cmd'] || "hugo"
   end
 
+  def delete_note(note, fname)
+    if File.exist?(fname)
+      msg "   This note has been deleted from Evernote, deleting its file #{oldfile}"
+      File.delete(fname)
+    end
+    note.resources.each do |r|
+      if r.mime =~ /(\S+)\/(\S+)/
+        type = $1
+        subtype = $2
+        hash = Digest.hexencode(r.data.bodyHash)
+        basename = if (!r.attributes.nil? && !r.attributes.fileName.nil?)
+                     r.attributes.fileName
+                   else
+                     "#{hash}.#{subtype}"
+                   end
+        dir = case type
+              when 'image'
+                @img_dir[0]
+              when 'audio'
+                @audio_dir[0]
+              when 'video'
+                @video_dir[0]
+              else
+                @files_dir[0]
+              end
+        rname = "#{dir}/#{hash}/#{basename}"
+        verbose "Checking if resource file #{rname} needs to be deleted."
+        if File.exist?(rname)
+          msg "   Removing resource file #{rname}"
+          File.delete(rname)
+        end
+      end
+    end
+  end
+  
   def output_note(note)
     msg "Found note '#{note.title}'"
     verbose "Created: #{Time.at(note.created/1000)}" if note.created
@@ -105,7 +141,7 @@ class Hugo < Output
       note_files.delete(note.guid)
       setconfig(:note_files, note_files, @config_store)
       if note.deleted
-        msg "   This note has been deleted from Evernote, removing its file #{oldfile}"
+        delete_note(note, oldfile)
         return
       end
     end
@@ -124,8 +160,7 @@ class Hugo < Output
           # Get the full filename as reported by Hugo
           fname = $1
           if note.deleted
-            File.delete(fname)
-            msg "   This note has been deleted from Evernote, removing its file #{oldfile}"
+            delete_note(note, fname)
             return
           end
           # Load the frontmatter
@@ -148,7 +183,7 @@ class Hugo < Output
           # If the file existed already, remove it and regenerate it
           File.delete(fname)
           if note.deleted
-            msg "   This note has been deleted from Evernote, removing its file #{oldfile}"
+            delete_note(note, fname)
             return
           end
           # This shouldn't happen due to the index check above

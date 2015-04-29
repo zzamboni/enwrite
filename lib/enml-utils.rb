@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 13:32:54 diego>
+# Time-stamp: <2015-04-28 23:59:06 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -21,10 +21,11 @@ class ENML_Listener
     @to_text = to_text
     @files = []
     @resources = resources || []
-    @img_dir = img_dir
-    @audio_dir = audio_dir
-    @video_dir = video_dir
-    @files_dir = files_dir
+    @dirs = { 'image' => img_dir,
+              'audio' => audio_dir,
+              'video' => video_dir,
+              'files' => files_dir,
+            }
     @resource_index = {}
     @resources.each do |res|
       hash = Digest.hexencode(res.data.bodyHash)
@@ -36,6 +37,25 @@ class ENML_Listener
   def start_document
     @outdoc = Document.new
     @stack = [@outdoc]
+  end
+
+  def process_file(attributes, type, subtype)
+    resource = @resource_index[attributes['hash']]
+    if resource.nil?
+      error "An error occurred - I don't have a resource with hash #{attributes['hash']}"
+      return nil
+    else
+      new_file = {}
+      if (!resource.attributes.nil? && !resource.attributes.fileName.nil?)
+        new_file[:basename] = resource.attributes.fileName
+      else
+        new_file[:basename] = "#{attributes['hash']}.#{subtype}"
+      end
+      new_file[:fname] = "#{@dirs[type][0]}/#{attributes['hash']}/#{new_file[:basename]}"
+      new_file[:url] = "#{@dirs[type][1]}/#{attributes['hash']}/#{new_file[:basename]}"
+      new_file[:data] = resource.data.body
+      return new_file
+    end
   end
   
   def start_element(uri, localname, qname, attributes)
@@ -61,27 +81,23 @@ class ENML_Listener
     elsif localname == 'en-media'
       if attributes['type'] =~ /^image\/(.+)/
         subtype = $1
-        new_elem = Element.new('img')
-        resource = @resource_index[attributes['hash']]
-        if resource.nil?
-          error "An error occurred - I don't have a resource with hash #{attributes['hash']}"
-        else
-          new_file = {}
-          if (!resource.attributes.nil? && !resource.attributes.fileName.nil?)
-            new_file[:basename] = resource.attributes.fileName
-          else
-            new_file[:basename] = "#{attributes['hash']}.#{subtype}"
-          end
-          new_file[:fname] = "#{@img_dir[0]}/#{new_file[:basename]}"
-          new_file[:url] = "#{@img_dir[1]}/#{new_file[:basename]}"
-          new_file[:data] = resource.data.body
+        new_file = process_file(attributes, 'image', subtype)
+        if new_file
+          new_elem = Element.new('img')
           new_elem.add_attributes(attributes)
           new_elem.add_attribute('src', new_file[:url])
-
           @files.push(new_file)
         end
-      elsif attributes['type'] =~ /^audio\//
-        error "Don't know how to handle audio files yet"
+      elsif attributes['type'] =~ /^audio\/(.*)/
+        subtype = $1
+        new_file = process_file(attributes, 'audio', subtype)
+        if new_file
+          new_elem = Element.new('audio')
+          new_elem.add_attribute('controls', "1")
+          new_elem.add_attributes(attributes)
+          new_elem.add_element 'source', { 'src' => new_file[:url], 'type' => attributes['type'] }
+          @files.push(new_file)
+        end
       elsif attributes['type'] =~ /^video\//
         error "Don't know how to handle video files yet"
       else

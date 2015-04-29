@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-28 21:56:45 diego>
+# Time-stamp: <2015-04-29 00:24:43 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -105,7 +105,10 @@ class Enwrite
         options.configtag = conftag
       }
       opts.on_tail("-v", "--verbose", "Verbose mode") { options.verbose=true }
-      opts.on_tail("-v", "--debug", "Debug output mode") { options.debug=true }
+      opts.on_tail("-v", "--debug", "Debug output mode") {
+        options.debug=true
+        options.verbose=true
+      }
       opts.on_tail("--version", "Show version") { opts.show_version }
       opts.on_tail("-h", "--help", "Shows this help message") { opts.show_usage }
     end

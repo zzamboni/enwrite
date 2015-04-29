@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 00:20:20 diego>
+# Time-stamp: <2015-04-29 10:00:51 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -99,8 +99,18 @@ class ENML_Listener
           new_elem.add_text "Sorry, your browser does not support the #{type} tag."
           @files.push(new_file)
         end
+      elsif attributes['type'] =~ /^(\S+)\/(\S+)/
+        type = $1
+        subtype = $2
+        new_file = process_file(attributes, 'files', subtype)
+        if new_file
+          new_elem = Element.new('a')
+          new_elem.add_attribute('href', new_file[:url])
+          new_elem.add_text(new_file[:basename])
+          @files.push(new_file)
+        end
       else
-        error "Don't know how to handle other files yet"
+        error "Sorry, I don't know how to handle attachments of this type: #{attributes['type']}"
       end
     else
       new_elem = Element.new(localname)

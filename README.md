@@ -6,7 +6,7 @@
 
 Evernote-powered statically-generated blogs and websites.
 
-Very early work-in-progress, more to come soon.
+Still work-in-progress but functional, more docs to come soon.
 
 The first time you run it (or if you use the `--auth` flag afterward)
 you will be asked to open an Evernote authentication page, and then to
@@ -17,15 +17,9 @@ need to have an existing Hugo install.
 
 ## Getting started
 
-Clone this repository:
+Install using gem:
 
-    $ cd ~/tmp
-    $ git clone https://github.com/zzamboni/enwrite
-
-Install prerequisite gems using `bundler`:
-
-    $ gem install bundler
-    $ bundle install
+    $ gem install enwrite
 
 Create a new Hugo site for testing (if you don't have one already):
 
@@ -35,42 +29,52 @@ Create a new Hugo site for testing (if you don't have one already):
 
 Populate it with contents from Evernote:
 
-    $ cd ~/tmp/enwrite
-    $ ./enwrite.rb -h
-    Enwrite v0.0.1
+    $ enwrite --help
+    Enwrite v0.2.0
     
-    Usage: ./enwrite.rb [options] (at least one of -n or -s has to be specified)
+    Usage: /usr/local/bin/enwrite [options] (at least one of -n or -s has to be specified)
     
+    Search options:
         -n, --notebook NOTEBOOK          Process notes from specified notebook.
         -t, --tag TAG                    Process only notes that have this tag
-                                          within the given notebook.
-        -s, --search SEARCHEXP           Process notes that match given search
-                                          expression. If specified, --notebook
-                                          and --tag are ignored.
-        -o, --output-dir OUTDIR          Base dir of hugo output installation
+                                         within the given notebook.
             --remove-tags [t1,t2,t3]     List of tags to remove from output posts.
                                          If no argument given, defaults to --tag.
-            --auth [TOKEN]               Force Evernote reauthentication (will happen automatically if needed).
-                                         If TOKEN is given, use it, otherwise get one interactively.
-            --rebuild-all                Process all notes that match the given conditions (normally only updated
-                                         notes are processed)
-        -v, --verbose                    Verbose mode
+        -s, --search SEARCHEXP           Process notes that match given search
+                                         expression. If specified, --notebook
+                                         and --tag are ignored.
+    Output options:
+        -p, --output-plugin PLUGIN       Output plugin to use (Valid values: hugo)
+        -o, --output-dir OUTDIR          Base dir of hugo output installation
+            --rebuild-all                Process all notes that match the given
+                                         conditions (normally only updated notes
+                                         are processed)
+    Other options:
+            --auth [TOKEN]               Force Evernote reauthentication (will
+                                         happen automatically if needed). Use
+                                         TOKEN if given, otherwise get one
+                                         interactively.
+            --config-tag TAG             Specify tag to determine config notes
+                                         (default: _enwrite_config)
+            --verbose                    Verbose mode
+        -v, --debug                      Debug output mode
             --version                    Show version
         -h, --help                       Shows this help message
     
 Generate posts from all notes tagged `published` in notebook
 `my_notebook`:
 
-    $ ./enwrite.rb -n my_notebook -t published -o ~/tmp/my-hugo-blog
+    $ enwrite -n my_notebook -t published -o ~/tmp/my-hugo-blog
     $ cd ~/tmp/my-hugo-blog
     $ hugo server --watch
 
 Generate posts from all notes matching `some search expression`:
 
-    $ ./enwrite.rb -s 'some search expression' -o /tmp/my-hugo-blog
+    $ enwrite -s 'some search expression' -o /tmp/my-hugo-blog
 
-For now it correctly embeds images in notes. Videos, audio and other
-file types coming soon.
+Images, audio and video are embedded in the generated posts (audio
+and video are done using HTML5 `<audio>` and `<video>` tags). Other
+file types are stored and linked to with their filename.
 
 The following shortcuts are recognized:
 

@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 16:27:43 diego>
+# Time-stamp: <2015-04-30 16:52:56 diego>
 
 require 'rubygems'
 
@@ -23,7 +23,7 @@ class Enwrite
   module Version
     MAJOR = 0
     MINOR = 2
-    PATCH = 1
+    PATCH = 2
 
     STRING = [MAJOR, MINOR, PATCH].compact.join('.')
   end

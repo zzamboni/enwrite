@@ -2,10 +2,10 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 20:25:46 diego>
+# Time-stamp: <2015-04-29 21:14:05 diego>
 
 require 'output'
-require 'output/filters'
+require 'filters'
 require 'enml-utils'
 require 'fileutils'
 require 'yaml/store'

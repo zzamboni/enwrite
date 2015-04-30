@@ -60,7 +60,9 @@ Populate it with contents from Evernote:
         -v, --debug                      Debug output mode
             --version                    Show version
         -h, --help                       Shows this help message
-    
+
+## Sample usage
+
 Generate posts from all notes tagged `published` in notebook
 `my_notebook`:
 
@@ -76,6 +78,40 @@ Images, audio and video are embedded in the generated posts (audio
 and video are done using HTML5 `<audio>` and `<video>` tags). Other
 file types are stored and linked to with their filename.
 
+## Special tags
+
+The following tags trigger special behavior if found within the
+selected notes:
+
+- `page`: publish the note as a page instead of a blog post.
+- `post` (or none): publish the note as a blog post. This is the
+default.
+- `_home`: set this page as the default for the site. This is
+  dependent on the Hugo theme being used.
+- `_mainmenu`: add this page to the top-level navigation menu. This is
+  dependent on the Hugo theme being used.
+- `markdown`: store the note as Markdown instead of HTML. Markdown
+  notes can still contain images or other formatting, this will be left
+  untouched inside the Markdown file.
+- `_enwrite_config`: the contents of the note must be in YAML format
+  and contain configuration parameters to Enwrite (more documentation
+  about this will be written soon). For example, if you wanted blog
+  posts to be stored in the Hugo `blog` category instead of `post`,
+  you could include this:
+  ```
+  hugo:
+      tag_to_type:
+          default: blog/
+          post: blog/
+          page:
+  ```
+- `_enwrite_files_hugo`: text in these notes is ignored, but any
+  attachments are stored under the Hugo output directory. `.tar.gz`
+  files will be unpacked under that directory, all others will be
+  stored as-is.
+  
+## Shortcuts
+
 The following shortcuts are recognized:
 
 Embed Youtube video by URL or ID. You can optionally specify `width`
@@ -88,3 +124,8 @@ and `height`. All arguments must be enclosed in double quotes.
 Embed gist:
 
     [gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]
+
+## Bugs, feedback or other issues?
+
+Please open a
+[Github issue](https://github.com/zzamboni/enwrite/issues).

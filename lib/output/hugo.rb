@@ -146,7 +146,10 @@ class Hugo < Output
     Dir.chdir(@base_dir) do
       # Force -f yaml because it's so much easier to process
       while true
-        output = %x(#{@hugo_cmd} new -f yaml '#{post_filename}')
+        post_filename.gsub!(/"/, '\"')
+        cmd = %Q(#{@hugo_cmd} new -f yaml "#{post_filename}" 2>&1)
+        debug "Executing: #{cmd}"
+        output = %x(#{cmd})
         if output =~ /^(.+) created$/
           # Get the full filename as reported by Hugo
           fname = $1

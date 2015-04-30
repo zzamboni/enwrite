@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 20:24:52 diego>
+# Time-stamp: <2015-04-30 00:49:32 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -36,6 +36,7 @@ class Enwrite
     options.debug = false
     options.outputplugin = 'hugo'
     options.configtag = '_enwrite_config'
+    options.filestagprefix = '_enwrite_files'
 
     opts = OptionParser.new do |opts|
       def opts.version_string
@@ -219,8 +220,48 @@ class Enwrite
             results.totalNotes -= 1
           }
         end
-
         verbose "Final enwrite config: #{enwriteconfig}"
+
+        files_tag = "#{options.filestagprefix}_#{options.outputplugin}"
+
+        if Evernote_utils.tags.include?(files_tag)
+          files_tag_guid = Evernote_utils.tags[files_tag].guid
+          results.notes.select { |note|
+            note.tagGuids.include?(files_tag_guid)
+          }.each { |filesnotemd|
+            msg "Found files note '#{filesnotemd.title}'"
+            filesnote = Evernote_utils.getWholeNote(filesnotemd)
+            enml = ENML_utils.new(filesnote.content, filesnote.resources)
+            files = enml.resource_files
+            Dir.chdir("#{options.outdir}")
+            files.each do |file|
+              case
+              when file[:basename] =~ /\.tar.gz$/
+                f = Tempfile.new('enwrite')
+                begin
+                  verbose "   Saving file #{file[:basename]} to #{f.path}"
+                  f.write(file[:data])
+                  f.close
+                  verbose "   Unpacking file #{f.path} with tar"
+                  ok = system("tar zxf #{f.path}")
+                  unless ok
+                    error "   An error occurred when unpacking #{f.path}"
+                  end
+                ensure
+                  f.close
+                  f.unlink
+                end
+              else
+                open("#{options.outdir}/#{file[:basename]}", "w") do |f|
+                  verbose "   Saving file #{f.path}"
+                  f.write(file[:data])
+                end
+              end
+            end
+            results.notes.delete(filesnotemd)
+            results.totalNotes -= 1
+          }
+        end
 
         debug "Evaluating: #{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"
         writer = eval "#{options.outputplugin.capitalize}.new(enwriteconfig[options.outputplugin])"

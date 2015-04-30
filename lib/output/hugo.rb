@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 21:14:05 diego>
+# Time-stamp: <2015-04-30 00:43:32 diego>
 
 require 'output'
 require 'filters'
@@ -201,7 +201,7 @@ class Hugo < Output
       f.write(frontmatter.to_yaml)
       f.puts("---")
       f.puts
-      enml = ENML_utils.new(note.content, note.resources, @static_dirs)
+      enml = ENML_utils.new(note.content, note.resources, @static_dirs, note.guid)
       output = markdown ? enml.to_text : enml.to_html
       if @use_filters
         verbose "Running filters on text"

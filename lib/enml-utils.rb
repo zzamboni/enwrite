@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 16:09:22 diego>
+# Time-stamp: <2015-04-30 00:45:35 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -48,8 +48,10 @@ class ENML_Listener
       else
         new_file[:basename] = "#{attributes['hash']}.#{subtype}"
       end
-      new_file[:fname] = "#{@dirs[type][0]}/#{attributes['hash']}/#{new_file[:basename]}"
-      new_file[:url] = "#{@dirs[type][1]}/#{attributes['hash']}/#{new_file[:basename]}"
+      if @dirs[type]
+        new_file[:fname] = "#{@dirs[type][0]}/#{attributes['hash']}/#{new_file[:basename]}"
+        new_file[:url] = "#{@dirs[type][1]}/#{attributes['hash']}/#{new_file[:basename]}"
+      end
       new_file[:data] = resource.data.body
       return new_file
     end
@@ -163,6 +165,7 @@ class ENML_utils
     @resources = resources or []
     @static_dirs = static_dirs
     @note_guid = note_guid
+    @parsed = false
   end
 
   def to_html(to_text=false)
@@ -175,6 +178,7 @@ class ENML_utils
     parser.listen(listener)
     parser.parse
     @files = listener.files
+    @parsed = true
     debug "to_html output:"
     debug listener.output
     debug "-----"
@@ -186,6 +190,7 @@ class ENML_utils
   end
   
   def resource_files
+    to_html unless @parsed
     return @files
   end
 end

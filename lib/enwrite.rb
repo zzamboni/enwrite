@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 16:21:01 diego>
+# Time-stamp: <2015-04-30 16:27:43 diego>
 
 require 'rubygems'
 
@@ -16,6 +16,7 @@ require "ostruct"
 require 'util'
 require 'yaml'
 require 'deep_merge'
+require 'tempfile'
 
 class Enwrite
   PLUGINS = %w[hugo]

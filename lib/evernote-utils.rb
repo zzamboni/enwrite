@@ -2,7 +2,7 @@
 # Evernote access utilities
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-16 23:09:37 diego>
+# Time-stamp: <2015-04-30 16:30:27 diego>
 
 # Load libraries required by the Evernote OAuth
 require 'oauth'
@@ -59,7 +59,7 @@ then enwrite will use it automatically in the future.
     print "Would you like me to do that for you now (Y/n)? "
     $stdout.flush
     yesno = gets.chomp
-    if yesno =~ /^[yY]/
+    if yesno =~ /^([yY].*|)$/
       setconfig(:evernote_auth_token, access_token.token)
       puts "Token stored."
     else

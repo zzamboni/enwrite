@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 00:43:32 diego>
+# Time-stamp: <2015-04-30 11:28:34 diego>
 
 require 'output'
 require 'filters'
@@ -114,6 +114,14 @@ class Hugo < Output
       note.tagNames -= [ '_mainmenu' ]
     end
 
+    # Determine if we should use a custom slug
+    slug = nil
+    note.tagNames.grep(/^slug=(\S+)/) do |slugtag|
+      slug = $1
+      note.tagNames -= [ slugtag ]
+      verbose "   Will use custom slug for this post: #{slug}"
+    end
+
     # Get our note GUID-to-filename map
     note_files = config(:note_files, {}, @config_store)
     
@@ -167,7 +175,7 @@ class Hugo < Output
           frontmatter['tags'] = note.tagNames
           frontmatter['categories'] = note.tagNames
           # Set slug to work around https://github.com/spf13/hugo/issues/1017
-          frontmatter['slug'] = note.title.downcase.gsub(/\W+/, "-").gsub(/^-+/, "").gsub(/-+$/, "")
+          frontmatter['slug'] = slug ? slug : note.title.downcase.gsub(/\W+/, "-").gsub(/^-+/, "").gsub(/-+$/, "")
           # Set main menu tag if needed
           frontmatter['menu'] = 'main' if inmainmenu
           break

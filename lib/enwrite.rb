@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 00:49:32 diego>
+# Time-stamp: <2015-04-30 11:24:51 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -227,7 +227,8 @@ class Enwrite
         if Evernote_utils.tags.include?(files_tag)
           files_tag_guid = Evernote_utils.tags[files_tag].guid
           results.notes.select { |note|
-            note.tagGuids.include?(files_tag_guid)
+            note.tagGuids.include?(files_tag_guid) &&
+              note.updateSequenceNum > latestUpdateCount
           }.each { |filesnotemd|
             msg "Found files note '#{filesnotemd.title}'"
             filesnote = Evernote_utils.getWholeNote(filesnotemd)

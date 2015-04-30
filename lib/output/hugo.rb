@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 11:28:34 diego>
+# Time-stamp: <2015-04-30 12:40:31 diego>
 
 require 'output'
 require 'filters'
@@ -116,7 +116,7 @@ class Hugo < Output
 
     # Determine if we should use a custom slug
     slug = nil
-    note.tagNames.grep(/^slug=(\S+)/) do |slugtag|
+    note.tagNames.grep(/^_slug=(\S+)/) do |slugtag|
       slug = $1
       note.tagNames -= [ slugtag ]
       verbose "   Will use custom slug for this post: #{slug}"

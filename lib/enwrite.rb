@@ -4,7 +4,7 @@
 # enwrite - power a web site using Evernote
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 00:24:43 diego>
+# Time-stamp: <2015-04-29 20:24:52 diego>
 
 require 'rubygems'
 require 'bundler/setup'
@@ -252,6 +252,6 @@ class Enwrite
       #the exceptions that come back from Evernote are hard to read, but really important to keep track of
       msg = "Caught an exception from Evernote trying to create a note.  #{Evernote_utils.translate_error(e)}"
       raise msg
-    end      
+    end
   end
 end

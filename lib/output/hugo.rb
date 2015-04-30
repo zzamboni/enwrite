@@ -2,7 +2,7 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 15:11:10 diego>
+# Time-stamp: <2015-04-29 20:25:46 diego>
 
 require 'output'
 require 'output/filters'
@@ -32,11 +32,12 @@ class Hugo < Output
     @config_store.transaction { @config_store[:note_files] = {} unless @config_store[:note_files] }
     
     # These are [ realpath, urlpath ]
-    @static_dir = opts['static_dir'] || [ "#{@base_dir}/static", "/" ]
-    @img_dir = opts['img_dir'] || [ "#{@static_dir[0]}/img", "/img" ]
-    @audio_dir = opts['audio_dir'] || [ "#{@static_dir[0]}/audio", "/audio" ]
-    @video_dir = opts['video_dir'] || [ "#{@static_dir[0]}/video", "/video" ]
-    @files_dir = opts['files_dir'] || [ "#{@static_dir[0]}/files", "/files" ]
+    @static_dir = [ "#{@base_dir}/#{opts['static_subdir'] || 'static' }", opts['static_url'] || "" ]
+    @static_subdirs = { 'image' => opts['image_subdir'] || 'img',
+                        'audio' => opts['audio_subdir'] || 'audio',
+                        'video' => opts['video_subdir'] || 'video',
+                        'files' => opts['files_subdir'] || 'files',
+                      }
 
     # Tag-to-type map
     @tag_to_type = opts['tag_to_type'] || { "default" => "post/",
@@ -56,42 +57,32 @@ class Hugo < Output
     @hugo_cmd = opts['hugo_cmd'] || "hugo"
   end
 
-  def delete_note(note, fname)
-    if File.exist?(fname)
-      msg "   This note has been deleted from Evernote, deleting its file #{oldfile}"
-      File.delete(fname)
-    end
-    note.resources.each do |r|
-      if r.mime =~ /(\S+)\/(\S+)/
-        type = $1
-        subtype = $2
-        hash = Digest.hexencode(r.data.bodyHash)
-        basename = if (!r.attributes.nil? && !r.attributes.fileName.nil?)
-                     r.attributes.fileName
-                   else
-                     "#{hash}.#{subtype}"
-                   end
-        dir = case type
-              when 'image'
-                @img_dir[0]
-              when 'audio'
-                @audio_dir[0]
-              when 'video'
-                @video_dir[0]
-              else
-                @files_dir[0]
-              end
-        rname = "#{dir}/#{hash}/#{basename}"
-        verbose "Checking if resource file #{rname} needs to be deleted."
-        if File.exist?(rname)
-          msg "   Removing resource file #{rname}"
-          File.delete(rname)
-        end
-      end
+  def set_static_dirs(note)
+    @static_dirs = {}
+    @static_dirs['note'] = [ "#{@static_dir[0]}/note/#{note.guid}",
+                             "#{@static_dir[1]}/note/#{note.guid}" ]
+    ['image', 'audio', 'video', 'files']. each do |type|
+      @static_dirs[type] = [ "#{@static_dirs['note'][0]}/#{@static_subdirs[type]}",  # full path
+                             "#{@static_dirs['note'][1]}/#{@static_subdirs[type]}" ]; # url path
     end
   end
   
+  def delete_note(note, fname)
+    set_static_dirs(note)
+
+    if File.exist?(fname)
+      msg "   This note has been deleted from Evernote, deleting its file #{fname}"
+      File.delete(fname)
+    end
+    if Dir.exist?(@static_dirs['note'][0])
+      msg "   Deleting static files for deleted note #{@static_dirs['note'][0]}"
+      FileUtils.rmtree(@static_dirs['note'][0])
+    end
+  end
+
   def output_note(note)
+    set_static_dirs(note)
+
     msg "Found note '#{note.title}'"
     verbose "Created: #{Time.at(note.created/1000)}" if note.created
     verbose "Deleted: #{Time.at(note.deleted/1000)}" if note.deleted
@@ -207,8 +198,7 @@ class Hugo < Output
       f.write(frontmatter.to_yaml)
       f.puts("---")
       f.puts
-      enml = ENML_utils.new(note.content, note.resources,
-                            @img_dir, @audio_dir, @video_dir, @files_dir)
+      enml = ENML_utils.new(note.content, note.resources, @static_dirs)
       output = markdown ? enml.to_text : enml.to_html
       if @use_filters
         verbose "Running filters on text"

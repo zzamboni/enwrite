@@ -3,7 +3,7 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-29 10:00:51 diego>
+# Time-stamp: <2015-04-29 16:09:22 diego>
 
 require 'digest'
 require 'htmlentities'
@@ -17,15 +17,12 @@ include REXML
 class ENML_Listener
   include REXML::SAX2Listener
 
-  def initialize(resources, to_text, img_dir, audio_dir, video_dir, files_dir)
+  def initialize(resources, to_text, static_dirs, note_guid)
     @to_text = to_text
     @files = []
     @resources = resources || []
-    @dirs = { 'image' => img_dir,
-              'audio' => audio_dir,
-              'video' => video_dir,
-              'files' => files_dir,
-            }
+    @dirs = static_dirs
+    @note_guid = note_guid
     @resource_index = {}
     @resources.each do |res|
       hash = Digest.hexencode(res.data.bodyHash)
@@ -161,13 +158,11 @@ class ENML_Listener
 end
 
 class ENML_utils
-  def initialize(text, resources = nil, img_dir = nil, audio_dir = nil, video_dir = nil, files_dir = nil)
+  def initialize(text, resources = nil, static_dirs = {}, note_guid = "")
     @text = text or ""
     @resources = resources or []
-    @img_dir = img_dir
-    @audio_dir = audio_dir
-    @video_dir = video_dir
-    @files_dir = files_dir
+    @static_dirs = static_dirs
+    @note_guid = note_guid
   end
 
   def to_html(to_text=false)
@@ -176,7 +171,7 @@ class ENML_utils
     debug "-----"
     debug @text
     debug "-----"
-    listener = ENML_Listener.new(@resources, to_text, @img_dir, @audio_dir, @video_dir, @files_dir)
+    listener = ENML_Listener.new(@resources, to_text, @static_dirs, @note_guid)
     parser.listen(listener)
     parser.parse
     @files = listener.files

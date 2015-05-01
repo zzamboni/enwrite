@@ -3,7 +3,6 @@
 # ENML Processing class
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 00:45:35 diego>
 
 require 'digest'
 require 'htmlentities'

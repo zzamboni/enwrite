@@ -2,7 +2,6 @@
 # Output class for Hugo
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-04-30 12:40:31 diego>
 
 require 'output'
 require 'filters'

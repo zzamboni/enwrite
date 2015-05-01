@@ -1,9 +1,8 @@
 # Base class to output pages
 #
 # Diego Zamboni, March 2015
-# Time-stamp: <2015-03-29 00:51:04 diego>
+# Time-stamp: <2015-05-01 00:51:37 diego>
 
 class Output
-  def output_note(metadata, note)
-  end
+  # Just in case we need some base behavior later for output plugins.
 end

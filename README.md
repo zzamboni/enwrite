@@ -134,7 +134,7 @@ Embed gist:
 
     [gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]
 
-## Planned features/fixes:
+## Planned features/fixes
 
 - Configurability of attachment-handing mechanisms
 - Ability to configure all parameters through the config file

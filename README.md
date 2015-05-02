@@ -1,4 +1,4 @@
-# Enwrite
+# Enwrite [![Gem Version](https://badge.fury.io/rb/enwrite.svg)](http://badge.fury.io/rb/enwrite)
 
 > What wild heart-histories seemed to lie enwritten<br/>
 > Upon those crystalline, celestial spheres!

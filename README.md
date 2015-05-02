@@ -86,10 +86,6 @@ selected notes:
 - `page`: publish the note as a page instead of a blog post.
 - `post` (or none): publish the note as a blog post. This is the
 default.
-- `_home`: set this page as the default for the site. This is
-  dependent on the Hugo theme being used.
-- `_mainmenu`: add this page to the top-level navigation menu. This is
-  dependent on the Hugo theme being used.
 - `markdown`: store the note as Markdown instead of HTML. Markdown
   notes can still contain images or other formatting, this will be left
   untouched inside the Markdown file.
@@ -109,6 +105,19 @@ default.
   attachments are stored under the Hugo output directory. `.tar.gz`
   files will be unpacked under that directory, all others will be
   stored as-is.
+
+Any of these special tags are removed from the post before publishing
+(you can configure additional ones with the `--remove-tags`
+option). All other tags are passed through to the produced posts. Of
+course, you could have some of those tags also trigger special
+behavior within the output system. For example, my
+[custom Hugo theme](https://github.com/zzamboni/new/tree/master/themes/hyde-x-zzamboni)
+recognizes the following tags:
+
+- `_home`: set this page as the default for the site. This is
+  dependent on the Hugo theme being used.
+- `_mainmenu`: add this page to the top-level navigation menu. This is
+  dependent on the Hugo theme being used.
   
 ## Shortcuts
 
@@ -125,7 +134,25 @@ Embed gist:
 
     [gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]
 
-## Bugs, feedback or other issues?
+## Planned features/fixes:
+
+- Configurability of attachment-handing mechanisms
+- Ability to configure all parameters through the config file
+- Proper config hierarchy, something like: config file -> Evernote
+  config notes -> command-line switches
+- Improve documentation
+- Proper separation of output-plugin-specific functionality:
+  - Move output-specific config options and handling into the hugo
+    plugin
+  - Document the structure of an output plugin
+- Other plugins:
+	- Shortcut definitions
+	- Media handling (e.g. upload PDF files to scribd, others)
+	- Tag handling (need to define the behavior)
+- Add ability to run post-processing scripts and to specify looping
+- Ability to create pages that redirect to arbitrary URLs.
+
+## Bugs, feature requests, feedback or other issues?
 
 Please open a
 [Github issue](https://github.com/zzamboni/enwrite/issues).

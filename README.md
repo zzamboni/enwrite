@@ -136,7 +136,7 @@ Embed gist:
 
 ## Planned features/fixes
 
-[ ] Configurability of attachment-handing mechanisms #1
+- [Configurability of attachment-handing mechanisms](https://github.com/zzamboni/enwrite/issues/1)
 - Ability to configure all parameters through the config file
 - Proper config hierarchy, something like: config file -> Evernote
   config notes -> command-line switches

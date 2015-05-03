@@ -136,21 +136,7 @@ Embed gist:
 
 ## Planned features/fixes
 
-- [Configurability of attachment-handing mechanisms](https://github.com/zzamboni/enwrite/issues/1)
-- Ability to configure all parameters through the config file
-- Proper config hierarchy, something like: config file -> Evernote
-  config notes -> command-line switches
-- Improve documentation
-- Proper separation of output-plugin-specific functionality:
-  - Move output-specific config options and handling into the hugo
-    plugin
-  - Document the structure of an output plugin
-- Other plugins:
-	- Shortcut definitions
-	- Media handling (e.g. upload PDF files to scribd, others)
-	- Tag handling (need to define the behavior)
-- Add ability to run post-processing scripts and to specify looping
-- Ability to create pages that redirect to arbitrary URLs.
+https://github.com/zzamboni/enwrite/labels/enhancement
 
 ## Bugs, feature requests, feedback or other issues?
 

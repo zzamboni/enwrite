@@ -166,6 +166,11 @@ class Enwrite
       if (currentUpdateCount > latestUpdateCount)
         msg "Reading #{options.rebuild_all ? 'all' : 'updated'} notes that match #{searchexp}"
 
+        # There are new notes, doesn't necessarily mean any of them are withing the
+        # selected content, so we keep track of whether we actually produce any updates
+        # in the output.
+        something_updated = false
+
         filter = Evernote::EDAM::NoteStore::NoteFilter.new
         filter.words = searchexp
         filter.order = Evernote::EDAM::Type::NoteSortOrder::UPDATE_SEQUENCE_NUMBER
@@ -258,6 +263,7 @@ class Enwrite
                 end
               end
             end
+            something_updated = true
             results.notes.delete(filesnotemd)
             results.totalNotes -= 1
           }
@@ -276,11 +282,12 @@ class Enwrite
           note.tagNames = note.tagNames - options.removetags
           # This either creates or deletes posts as appropriate
           writer.output_note(note)
+          something_updated = true
         end
         # Persist the latest updatecount for next time
         setconfig(updatecount_index, currentUpdateCount)
 
-        exit 0
+        exit(something_updated ? 0 : 1)
       else
         msg "No updated notes that match #{searchexp}"
         exit 1

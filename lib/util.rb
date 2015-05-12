@@ -3,24 +3,28 @@ require 'colorize'
 
 # Message output
 
+def now
+  Time.now.strftime "%Y-%m-%d %H:%M:%S %Z %Y"
+end
+
 def verbose(msg)
-  puts ("Enwrite [VERBOSE]: " + msg).blue if $enwrite_verbose
+  puts ("#{now} Enwrite [VERBOSE]: " + msg).blue if $enwrite_verbose
 end
 
 def debug(msg)
-  puts ("Enwrite [DEBUG]: " + msg) if $enwrite_debug
+  puts ("#{now} Enwrite [DEBUG]: " + msg) if $enwrite_debug
 end
 
 def error(msg)
-  $stderr.puts ("Enwrite [ERROR]: " + msg).red
+  $stderr.puts ("#{now} Enwrite [ERROR]: " + msg).red
 end
 
 def msg(msg)
-  puts ("Enwrite [INFO]: " + msg).green
+  puts ("#{now} Enwrite [INFO]: " + msg).green
 end
 
 def warn(msg)
-  $stderr.puts ("Enwrite [WARN]: " + msg).light_yellow
+  $stderr.puts ("#{now} Enwrite [WARN]: " + msg).light_yellow
 end
 
 # Config file storage

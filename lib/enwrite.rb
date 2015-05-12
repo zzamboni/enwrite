@@ -164,7 +164,7 @@ class Enwrite
       verbose "Current update count for the account: #{currentUpdateCount}"
 
       if (currentUpdateCount > latestUpdateCount)
-        msg "Reading #{options.rebuild_all ? 'all' : 'updated'} notes that match #{searchexp}"
+        msg "Checking updated Evernote contents..."
 
         # There are new notes, doesn't necessarily mean any of them are withing the
         # selected content, so we keep track of whether we actually produce any updates
@@ -286,8 +286,10 @@ class Enwrite
         end
         # Persist the latest updatecount for next time
         setconfig(updatecount_index, currentUpdateCount)
+      end
 
-        exit(something_updated ? 0 : 1)
+      if something_updated
+        exit 0
       else
         msg "No updated notes that match #{searchexp}"
         exit 1

@@ -15,13 +15,16 @@ provide the authentication code to Enwrite.
 For now it produces output suitable for [Hugo](http://gohugo.io). You
 need to have an existing Hugo install.
 
+## Installation
+
+    $ sudo gem install enwrite
+
+Make sure you have Hugo installed:
+http://gohugo.io/overview/installing/
+
 ## Getting started
 
-Install using gem:
-
-    $ gem install enwrite
-
-Create a new Hugo site for testing (if you don't have one already):
+Create a new Hugo site for testing:
 
     $ cd ~/tmp
     $ hugo new site my-hugo-blog
@@ -30,7 +33,7 @@ Create a new Hugo site for testing (if you don't have one already):
 Populate it with contents from Evernote:
 
     $ enwrite --help
-    Enwrite v0.2.0
+    Enwrite v0.2.3
     
     Usage: /usr/local/bin/enwrite [options] (at least one of -n or -s has to be specified)
     
@@ -56,8 +59,8 @@ Populate it with contents from Evernote:
                                          interactively.
             --config-tag TAG             Specify tag to determine config notes
                                          (default: _enwrite_config)
-            --verbose                    Verbose mode
-        -v, --debug                      Debug output mode
+        -v, --verbose                    Verbose mode
+        -d, --debug                      Debug output mode
             --version                    Show version
         -h, --help                       Shows this help message
 
@@ -94,6 +97,7 @@ default.
   about this will be written soon). For example, if you wanted blog
   posts to be stored in the Hugo `blog` category instead of `post`,
   you could include this:
+
   ```
   hugo:
       tag_to_type:
@@ -104,35 +108,53 @@ default.
 - `_enwrite_files_hugo`: text in these notes is ignored, but any
   attachments are stored under the Hugo output directory. `.tar.gz`
   files will be unpacked under that directory, all others will be
-  stored as-is.
+  stored as-is. You can use this to have Hugo config files, themes,
+  static contents or anything else automatically installed by Enwrite
+  as well. Please note that any "files" notes *must also* be included
+  in the selection criteria specified by `-n`, `-t` or `-s` (e.g. if
+  you are using `-t published`, your files notes must also be tagged
+  `published` or they will be ignored).
 
-Any of these special tags are removed from the post before publishing
-(you can configure additional ones with the `--remove-tags`
-option). All other tags are passed through to the produced posts. Of
-course, you could have some of those tags also trigger special
-behavior within the output system. For example, my
-[custom Hugo theme](https://github.com/zzamboni/new/tree/master/themes/hyde-x-zzamboni)
+  Any text in files notes will be ignored, so you can use it to make
+  it human-readable. For example, I have the following note in the
+  notebook that powers http://zzamboni.org/new/, so I can start from a
+  plain Hugo site and have it fully customized after running
+  `enwrite`:
+  
+  ![Files note screenshot](https://www.evernote.com/shard/s2/sh/828dbfcd-83ff-493c-a247-493ed0704e73/fb8ffb0e1e417dd6/res/eaa1ca47-3cb1-4c4d-963e-815cfd83bd00/skitch.png)
+
+## Other tags
+
+All the special tags described above are removed from the post before
+publishing (you can configure additional ones to remove with the
+`--remove-tags` option). All other tags are passed through to the
+produced posts. Of course, you could have some of those tags also
+trigger special behavior within the output system. For example, my
+[custom Hyde-X Hugo theme](https://github.com/zzamboni/new/tree/master/themes/hyde-x-zzamboni)
 recognizes the following tags:
 
-- `_home`: set this page as the default for the site. This is
-  dependent on the Hugo theme being used.
-- `_mainmenu`: add this page to the top-level navigation menu. This is
-  dependent on the Hugo theme being used.
-  
+- `_home`: set this page as the default for the site.
+- `_mainmenu`: add this page to the top-level navigation menu.
+
 ## Shortcuts
 
-The following shortcuts are recognized:
+Shortcuts are of the form `[shortcutname params]`. The following
+shortcuts are currently recognized:
 
-Embed Youtube video by URL or ID. You can optionally specify `width`
-and `height`. All arguments must be enclosed in double quotes.
+- Embed Youtube video by URL or ID. You can optionally specify `width`
+  and `height`. All arguments must be enclosed in double quotes.
 
-    [youtube url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
-    [youtube src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
-    [youtube id="dQw4w9WgXcQ" width="640px" height="480px"]
+  ```
+[youtube url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+[youtube src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
+[youtube id="dQw4w9WgXcQ" width="640px" height="480px"]
+  ```
 
-Embed gist:
+- Embed gist.
 
-    [gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]
+  ```
+[gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]
+  ```
 
 ## Planned features/fixes
 

@@ -107,18 +107,12 @@ class Hugo < Output
       return
     end
 
-    # Determine if we should include the page in the main menu
-    inmainmenu = note.tagNames.include?('_mainmenu')
-    if inmainmenu
-      note.tagNames -= [ '_mainmenu' ]
-    end
-
-    # Determine if we should use a custom slug
-    slug = nil
-    note.tagNames.grep(/^_slug=(\S+)/) do |slugtag|
-      slug = $1
-      note.tagNames -= [ slugtag ]
-      verbose "   Will use custom slug for this post: #{slug}"
+    # Determine if we should add custom frontmatter
+    custom_fm = {}
+    note.tagNames.grep(/^_(\S+)=(.*)/) do |tag|
+      custom_fm[$1] = $2
+      note.tagNames -= [ tag ]
+      verbose "   Will use custom frontmatter entry for this post: #{$1} = #{custom_fm[$1]}"
     end
 
     # Get our note GUID-to-filename map
@@ -173,10 +167,12 @@ class Hugo < Output
           # Update tags, for now set categories to the same
           frontmatter['tags'] = note.tagNames
           frontmatter['categories'] = note.tagNames
+          # Set custom frontmatter
+          custom_fm.each do |k,v|
+            frontmatter[k] = v
+          end
           # Set slug to work around https://github.com/spf13/hugo/issues/1017
-          frontmatter['slug'] = slug ? slug : note.title.downcase.gsub(/\W+/, "-").gsub(/^-+/, "").gsub(/-+$/, "")
-          # Set main menu tag if needed
-          frontmatter['menu'] = 'main' if inmainmenu
+          frontmatter['slug'] = custom_fm['slug'] ? custom_fm['slug'] : note.title.downcase.gsub(/\W+/, "-").gsub(/^-+/, "").gsub(/-+$/, "")
           break
         elsif output =~ /ERROR: \S+ (.+) already exists/
           # Get the full filename as reported by Hugo

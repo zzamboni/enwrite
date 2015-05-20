@@ -86,6 +86,8 @@ file types are stored and linked to with their filename.
 The following tags trigger special behavior if found within the
 selected notes:
 
+### Globally-recognized tags
+
 - `page`: publish the note as a page instead of a blog post.
 - `post` (or none): publish the note as a blog post. This is the
 default.
@@ -105,6 +107,12 @@ default.
           post: blog/
           page:
   ```
+
+### Hugo-specific tags
+
+The following tags are recognized by the Hugo output plugin (the only
+one available at the moment):
+
 - `_enwrite_files_hugo`: text in these notes is ignored, but any
   attachments are stored under the Hugo output directory. `.tar.gz`
   files will be unpacked under that directory, all others will be
@@ -123,6 +131,12 @@ default.
   
   ![Files note screenshot](https://www.evernote.com/shard/s2/sh/828dbfcd-83ff-493c-a247-493ed0704e73/fb8ffb0e1e417dd6/res/eaa1ca47-3cb1-4c4d-963e-815cfd83bd00/skitch.png)
 
+- Any tags of the form `_foo=bar` are inserted into the frontmatter
+  for the generated posts as field `foo` with value `bar`. This might
+  be used to add information (e.g. a custom `slug`, specify `weight` for
+  ordeing of pages, or any other field which may control the behavior or
+  output produced.
+  
 ## Other tags
 
 All the special tags described above are removed from the post before
@@ -134,7 +148,7 @@ trigger special behavior within the output system. For example, my
 recognizes the following tags:
 
 - `_home`: set this page as the default for the site.
-- `_mainmenu`: add this page to the top-level navigation menu.
+- `_menu=main`: add this page to the top-level navigation menu.
 
 ## Shortcuts
 

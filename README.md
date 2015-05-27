@@ -4,7 +4,11 @@
 > Upon those crystalline, celestial spheres!
 <p align="right">&mdash;Edgar Allan Poe</p>
 
-Evernote-powered statically-generated blogs and websites.
+Evernote-powered statically-generated blogs and websites. Now posting
+to your blog or updating your website is as easy as writing a new note
+in Evernote! Post from the Evernote application on any device, use the
+web clipper, or post by email. Enwrite will pick up the new content
+and post it automatically!
 
 Still work-in-progress but functional, more docs to come soon.
 

@@ -13,7 +13,8 @@ you will be asked to open an Evernote authentication page, and then to
 provide the authentication code to Enwrite.
 
 For now it produces output suitable for [Hugo](http://gohugo.io). You
-need to have an existing Hugo install.
+need to have an existing Hugo install. Output to other blogging/site
+generator tools is planned for the future through output plugins.
 
 ## Installation
 

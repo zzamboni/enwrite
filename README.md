@@ -33,7 +33,7 @@ Create a new Hugo site for testing:
 Populate it with contents from Evernote:
 
     $ enwrite --help
-    Enwrite v0.2.3
+    Enwrite v0.2.4
     
     Usage: /usr/local/bin/enwrite [options] (at least one of -n or -s has to be specified)
     
@@ -129,7 +129,7 @@ one available at the moment):
   plain Hugo site and have it fully customized after running
   `enwrite`:
   
-  ![Files note screenshot](https://www.evernote.com/shard/s2/sh/828dbfcd-83ff-493c-a247-493ed0704e73/fb8ffb0e1e417dd6/res/eaa1ca47-3cb1-4c4d-963e-815cfd83bd00/skitch.png)
+  ![Files note screenshot](https://www.evernote.com/shard/s2/sh/f1baa4dc-9e30-4c61-9f94-0014ba80a531/900eb250af52c9e5/res/96777fc2-8ac6-4d30-9943-e05014df5dc8/skitch.png)
 
 - Any tags of the form `_foo=bar` are inserted into the frontmatter
   for the generated posts as field `foo` with value `bar`. This might

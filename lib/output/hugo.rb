@@ -148,7 +148,7 @@ class Hugo < Output
       # Force -f yaml because it's so much easier to process
       while true
         post_filename.gsub!(/"/, '\"')
-        cmd = %Q(#{@hugo_cmd} new -f yaml "#{post_filename}" 2>&1)
+        cmd = %Q(#{@hugo_cmd} new "#{post_filename}" 2>&1)
         debug "Executing: #{cmd}"
         output = %x(#{cmd})
         if output =~ /^(.+) created$/

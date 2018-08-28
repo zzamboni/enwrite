@@ -163,17 +163,17 @@ shortcuts are currently recognized:
 - Embed Youtube video by URL or ID. You can optionally specify `width`
   and `height`. All arguments must be enclosed in double quotes.
 
-  ```
+```
 [youtube url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
 [youtube src="https://www.youtube.com/watch?v=dQw4w9WgXcQ"]
 [youtube id="dQw4w9WgXcQ" width="640px" height="480px"]
-  ```
+```
 
 - Embed gist.
 
-  ```
+```
 [gist url="https://gist.github.com/zzamboni/843142d3f759e582fe8f"]
-  ```
+```
 
 ## Planned features/fixes
 

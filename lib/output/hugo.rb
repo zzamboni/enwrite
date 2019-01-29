@@ -119,7 +119,7 @@ class Hugo < Output
     note_files = config(:note_files, {}, @config_store)
     
     # Determine the name I would assign to this note when published to Hugo
-    date = Time.at(note.created/1000).strftime('%F')
+    date = Time.at(note.created/1000).strftime('%a %b %e %H:%M:%S %Z %Y')
     post_filename = "#{type}#{date}-#{note.title}.#{markdown ? 'md' : 'html'}"
     # Do we already have a post for this note (by GUID)? If so, we remove the
     # old file since it will be regenerated anyway, which also takes care of the

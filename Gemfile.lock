@@ -51,7 +51,7 @@ GEM
       multi_xml (~> 0.5)
       rack (>= 1.2, < 3)
     psych (3.1.0)
-    rack (2.0.7)
+    rack (2.0.8)
     rake (12.3.2)
     rdoc (6.1.1)
     semver2 (3.4.2)

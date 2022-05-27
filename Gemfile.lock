@@ -53,7 +53,7 @@ GEM
       rack (>= 1.2, < 3)
     psych (3.1.0)
     racc (1.5.2)
-    rack (2.2.3)
+    rack (2.2.3.1)
     rake (13.0.1)
     rdoc (6.3.1)
     semver2 (3.4.2)

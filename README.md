@@ -4,6 +4,9 @@
 > Upon those crystalline, celestial spheres!
 <p align="right">&mdash;Edgar Allan Poe</p>
 
+> [!IMPORTANT]
+> I am no longer actively developing this tool, other than merging auto-generated Dependabot patches. Feel free to try it out at your own risk.
+
 Evernote-powered statically-generated blogs and websites. Now posting
 to your blog or updating your website is as easy as writing a new note
 in Evernote! Post from the Evernote application on any device, use the

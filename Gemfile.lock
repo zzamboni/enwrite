@@ -2,6 +2,7 @@ GEM
   remote: http://rubygems.org/
   specs:
     addressable (2.4.0)
+    base64 (0.3.0)
     builder (3.2.3)
     colorize (0.8.1)
     deep_merge (1.2.1)
@@ -36,7 +37,8 @@ GEM
       rake
       rdoc
       semver2
-    jwt (2.1.0)
+    jwt (2.10.3)
+      base64
     mime-types (2.99.3)
     mini_portile2 (2.8.9)
     multi_json (1.13.1)
